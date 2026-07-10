@@ -1,48 +1,58 @@
-import React from 'react'
-import { FcGoogle } from "react-icons/fc";
-import { signInWithPopup } from "firebase/auth";
-import { auth, googleAuthProvider } from "./utils/firebase.js";
-import api from './utils/axiosconfig.js'
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Homepage from './pages/Homepage.jsx';
+import Login from './pages/authentication/Login.jsx';
+import Register from './pages/authentication/Register.jsx';
+import { getcurrentUser } from './features/GetcurrentUser.js';
 
-function App() {
-
-  
-  const login = async(token)=>{
-    try {
-      const {data} = await api.post("/auth/login",{token});
-      console.log(data);
-
-    } catch (error) {
-      console.log('login error',error);
-    }
+// A simple protected route component
+const ProtectedRoute = ({ user, children }) => {
+  if (!user) {
+    return <Navigate to="/login" replace />;
   }
-  
-  const googlelogin = async () => {
-  try {
-    const data = await signInWithPopup(auth, googleAuthProvider);
-    const token = await data.user.getIdToken();
-    console.log(token);
-
-    await login(token);
-  } catch (error) {
-    console.log(error);
-  }
+  return children;
 };
 
-  return (
-     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 via-white to-blue-100">
-      <button className="group flex items-center gap-3 rounded-2xl bg-white px-8 py-4 shadow-lg border border-gray-200 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:border-blue-400 active:scale-95" onClick={googlelogin}>
-        
-        <div className="rounded-full bg-gray-100 p-2 transition">
-          <FcGoogle size={28} />
-        </div>
+function App() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-        <span className="text-lg font-semibold text-gray-700">
-          Continue with Google
-        </span>
-      </button>
-    </div>
-  )
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const currentUser = await getcurrentUser();
+        setUser(currentUser); // Assuming getcurrentUser returns user data or null
+      } catch (error) {
+        console.log("Error fetching user:", error);
+        setUser(null); // Ensure user is null on error
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>; // Or a proper spinner component
+  }
+
+  return (
+    <Router>
+      <Routes>
+        <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
+        <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
+        <Route 
+          path="/" 
+          element={
+            <ProtectedRoute user={user}>
+              <Homepage />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;
