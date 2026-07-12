@@ -8,7 +8,7 @@ dotenv.config()
 const connectDB = async()=>{
     try {
         await mongoose.connect(process.env.MONGOOSE_URL)
-        console.log('auth service DB connected!')
+        console.log('chat service DB connected!')
     } catch (error) {
     console.error("DB connection error:", error.message);
 }

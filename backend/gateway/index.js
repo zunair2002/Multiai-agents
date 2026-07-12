@@ -5,6 +5,7 @@ import cors from "cors"
 import cookieParser from "cookie-parser"
 import protect from "./middleware/auth.middleware.js"
 import {currentuser} from "./controller/auth.controller.js"
+import {proxyheader} from "./utils/proxyheader.js"
 
 dotenv.config()
 
@@ -15,6 +16,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use('/api/auth',proxy(process.env.AUTH_URL))
+app.use('/api/chat',proxyheader(process.env.CHAT_URL))
 app.get('/api/currentuser',protect,currentuser)
 app.get('/',(req,res)=>{
     res.json({message:'hellllo g gateway'})

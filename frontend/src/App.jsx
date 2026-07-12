@@ -1,54 +1,47 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Homepage from './pages/Homepage.jsx';
-import Login from './pages/authentication/Login.jsx';
-import Register from './pages/authentication/Register.jsx';
-import { getcurrentUser } from './features/GetcurrentUser.js';
-
-// A simple protected route component
-const ProtectedRoute = ({ user, children }) => {
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-  return children;
-};
+import React, { useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import Homepage from "./pages/Homepage.jsx";
+import Login from "./pages/authentication/Login.jsx";
+import { getcurrentUser } from "./features/GetcurrentUser.js";
+import { useDispatch, useSelector } from "react-redux";
+import { setUser } from "./redux/userdatasclice.js";
 
 function App() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.userData.user);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const currentUser = await getcurrentUser();
-        setUser(currentUser); // Assuming getcurrentUser returns user data or null
+        if (currentUser) {
+          const { firebaseId, ...user } = currentUser;
+          console.log("App.js sy fetch data:", user);
+          dispatch(setUser(user));
+        } else {
+          dispatch(setUser(null));
+        }
       } catch (error) {
         console.log("Error fetching user:", error);
-        setUser(null); // Ensure user is null on error
-      } finally {
-        setLoading(false);
+        dispatch(setUser(null));
       }
     };
 
     fetchUser();
-  }, []);
-
-  if (loading) {
-    return <div>Loading...</div>; // Or a proper spinner component
-  }
+  }, [dispatch]);
 
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
-        <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
-        <Route 
-          path="/" 
-          element={
-            <ProtectedRoute user={user}>
-              <Homepage />
-            </ProtectedRoute>
-          }
+        <Route path="/login" element={<Login />} />
+        <Route
+          path="/"
+          element={user ? <Homepage /> : <Navigate to="/login" />}
         />
       </Routes>
     </Router>
