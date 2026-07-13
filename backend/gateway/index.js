@@ -16,7 +16,8 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use('/api/auth',proxy(process.env.AUTH_URL))
-app.use('/api/chat',proxyheader(process.env.CHAT_URL))
+app.use('/api/chat',protect,proxyheader(process.env.CHAT_URL))
+app.use('/api/agent',protect,proxy(process.env.AGENT_URL))
 app.get('/api/currentuser',protect,currentuser)
 app.get('/',(req,res)=>{
     res.json({message:'hellllo g gateway'})

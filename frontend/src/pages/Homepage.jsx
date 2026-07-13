@@ -1,9 +1,10 @@
 import React from 'react'
+import Sidebar from '../components/Sidebar'
 
 function Homepage() {
   return (
     <div>
-      <h1>home page</h1>
+      <Sidebar/>
     </div>
   )
 }
