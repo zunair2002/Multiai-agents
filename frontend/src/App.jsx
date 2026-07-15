@@ -5,7 +5,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import Homepage from "./pages/Homepage.jsx";
+import Mainpage from "./pages/Mainpage/Mainhome.jsx"
 import Login from "./pages/authentication/Login.jsx";
 import { getcurrentUser } from "./features/GetcurrentUser.js";
 import { useDispatch, useSelector } from "react-redux";
@@ -41,7 +41,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route
           path="/"
-          element={user ? <Homepage /> : <Navigate to="/login" />}
+          element={user ? <Mainpage /> : <Navigate to="/login" />}
         />
       </Routes>
     </Router>

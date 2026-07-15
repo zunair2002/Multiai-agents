@@ -1,4 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { getConversation } from '../features/Getconversations.js'
+import { useDispatch } from 'react-redux'
+
 import {
   FiSearch,
   FiChevronDown,
@@ -20,6 +23,18 @@ import {
 } from "react-icons/fi";
 
 const Sidebar = () => {
+const Dispatch = useDispatch()
+
+
+  useEffect(() => {
+    const getConversationData = async() => {
+      const data = await getConversation()
+      Dispatch(setConversationData(data))
+      console.log(data)
+    }
+    getConversationData()
+  }, [])
+
   const mainMenuItems = [
     { name: "Dashboard", icon: <FiGrid />, active: true },
     { name: "Customers", icon: <FiUsers />, active: false },
@@ -27,10 +42,10 @@ const Sidebar = () => {
   const salesChannels = [{ name: "Recent Chats", icon: <FiMessageCircle /> }];
   return (
     <div className="flex h-screen w-full bg-white font-sans antialiased overflow-hidden">
-      <aside className="w-[25%] h-full bg-[#18181b] flex flex-col border-r border-white/5">
+      <aside className="w-full h-full bg-[#18181b] flex flex-col border-r border-white/5">
         {/* Header / Store Selector */}
         <div className="p-4">
-          <div className="flex items-center justify-between p-2 rounded-xl hover:bg-white/5 cursor-pointer transition-all duration-200">
+          <div className="flex items-center justify-between p-2 rounded-xl transition-all duration-200">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg flex items-center justify-center shadow-lg">
                 <img
@@ -46,7 +61,9 @@ const Sidebar = () => {
                 <span className="text-gray-500 text-xs">Workspace</span>
               </div>
             </div>
-            <FiChevronDown className="text-gray-500 text-sm" />
+<div className="p-1 rounded-full hover:bg-white/10 cursor-pointer transition-all duration-200">
+  <FiPlus className="text-gray-500 text-lg" />
+</div>
           </div>
         </div>
 
