@@ -1,7 +1,8 @@
-import { getModels } from "./config/llmmodels.js";
+import { getModels } from "../config/llmmodels.js";
 
 export const router = async (state) => {
-  const LLM = await getModels("router")
+  const LLM = await getModels("router");
+
   const prompt = 
   `
   You are an Intelligent Agent Router.
@@ -266,12 +267,13 @@ Only choose SEARCH_AGENT if freshness or external information is required.
 Never choose PDF_AGENT unless the request depends on uploaded PDF content.
 
 user query: ${state.prompt}
-  `
-}
+  `;
 
-const response = await LLM.invoke(prompt)
-console.log(response)
-return {
+  const response = await LLM.invoke(prompt);
+  console.log(response);
+
+  return {
     ...state,
-    agentkey:response.content.trim().toLowerCase(),
-}
+    agentkey: response.content.trim().toLowerCase(),
+  };
+};

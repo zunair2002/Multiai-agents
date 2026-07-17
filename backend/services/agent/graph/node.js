@@ -1,16 +1,16 @@
 import { StateGraph } from "@langchain/langgraph";
 import { agentstate } from "./state.js";
-import { routeragent } from "./router.agent.js";
-import { searchagent } from "./search.agent.js";
-import { pdfagent } from "./pdf.agent.js";
-import { chatagent } from "./chat.agent.js";
+import { router } from "./router.js";
+import { searchagent } from "../search.agent.js";
+import { pdfagent } from "../pdf.agent.js";
+import { chatagent } from "../chat.agent.js";
 
 
 const workflow = new StateGraph(agentstate)
 
 //sara workflow bhna liya
 
-workflow.addNode("router",routeragent)
+workflow.addNode("router",router)
 
 workflow.addNode("search",searchagent)
 workflow.addNode("pdf",pdfagent)

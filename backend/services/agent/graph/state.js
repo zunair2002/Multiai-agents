@@ -1,6 +1,6 @@
-import { AnnotationState } from "@langchain/langgraph";
+import { Annotation } from "@langchain/langgraph";
 
-export const agentstate = AnnotationState.Root({
+export const agentstate = Annotation.Root({
  prompt:Annotation(),
  response:Annotation(),
  agentkey:Annotation(),

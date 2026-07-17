@@ -1,49 +1,58 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { getConversation } from '../features/Getconversations.js'
-import { useDispatch } from 'react-redux'
+import { createConversation } from '../features/Createconversations.js'
+import { useDispatch, useSelector } from 'react-redux'
+import { setConversationData, addConversationData } from '../redux/conversationsdataslice.js'
 
 import {
   FiSearch,
-  FiChevronDown,
   FiGrid,
-  FiShoppingBag,
-  FiBox,
   FiUsers,
-  FiBarChart2,
-  FiSpeaker,
-  FiTag,
-  FiLayers,
-  FiPlus,
-  FiMonitor,
-  FiFacebook,
-  FiInstagram,
   FiSettings,
   FiHelpCircle,
   FiMessageCircle,
+  FiPlus,
 } from "react-icons/fi";
 
 const Sidebar = () => {
-const Dispatch = useDispatch()
-
+  const dispatch = useDispatch();
+  const conversationData = useSelector((state) => state.conversationData.conversationData);
+  const [activeConversation, setActiveConversation] = useState(null);
 
   useEffect(() => {
     const getConversationData = async() => {
       const data = await getConversation()
-      Dispatch(setConversationData(data))
-      console.log(data)
+      if (data) {
+        dispatch(setConversationData(data));
+      }
+      console.log("Fetched conversations:", data);
     }
     getConversationData()
-  }, [])
+  }, [dispatch])
+
+  const handleCreateConversation = async () => {
+    const newConversation = await createConversation();
+    if (newConversation) {
+      dispatch(addConversationData(newConversation));
+      setActiveConversation(newConversation);
+      console.log("New conversation created and added to Redux:", newConversation);
+    }
+  }
+
+  const handleConversationClick = (conversation) => {
+    setActiveConversation(conversation);
+    console.log("Selected conversation:", conversation);
+  }
 
   const mainMenuItems = [
     { name: "Dashboard", icon: <FiGrid />, active: true },
     { name: "Customers", icon: <FiUsers />, active: false },
   ];
-  const salesChannels = [{ name: "Recent Chats", icon: <FiMessageCircle /> }];
+
   return (
     <div className="flex h-screen w-full bg-white font-sans antialiased overflow-hidden">
       <aside className="w-full h-full bg-[#18181b] flex flex-col border-r border-white/5">
-        {/* Header / Store Selector */}
+        {/* Header */}
         <div className="p-4">
           <div className="flex items-center justify-between p-2 rounded-xl transition-all duration-200">
             <div className="flex items-center gap-3">
@@ -61,9 +70,12 @@ const Dispatch = useDispatch()
                 <span className="text-gray-500 text-xs">Workspace</span>
               </div>
             </div>
-<div className="p-1 rounded-full hover:bg-white/10 cursor-pointer transition-all duration-200">
-  <FiPlus className="text-gray-500 text-lg" />
-</div>
+            <button 
+              className="p-1 rounded-full hover:bg-white/10 cursor-pointer transition-all duration-200" 
+              onClick={handleCreateConversation}
+            >
+              <FiPlus className="text-gray-500 text-lg" />
+            </button>
           </div>
         </div>
 
@@ -83,7 +95,7 @@ const Dispatch = useDispatch()
           </div>
         </div>
 
-        {/* Main Navigation Scrollable Area */}
+        {/* Navigation Area */}
         <div className="flex-1 overflow-y-auto px-3 space-y-1 custom-scrollbar">
           {mainMenuItems.map((item) => (
             <button
@@ -94,31 +106,44 @@ const Dispatch = useDispatch()
                   : "text-gray-400 hover:bg-white/5 hover:text-white"
               }`}
             >
-              <span
-                className={`text-lg transition-colors ${item.active ? "text-white" : "text-gray-500 group-hover:text-white"}`}
-              >
+              <span className={`text-lg transition-colors ${item.active ? "text-white" : "text-gray-500 group-hover:text-white"}`}>
                 {item.icon}
               </span>
               <span className="text-[14px] font-medium">{item.name}</span>
             </button>
           ))}
 
-          {/* Divider */}
-          <div className="h-[1px] bg-white/5 my-4 mx-1"></div>
-          {salesChannels.map((channel) => (
-            <button
-              key={channel.name}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition-all duration-200 group"
-            >
-              <span className="text-lg text-gray-500 group-hover:text-white transition-colors">
-                {channel.icon}
-              </span>
-              <span className="text-[14px] font-medium">{channel.name}</span>
-            </button>
-          ))}
+<div className="border-t border-white/5 -mx-3 mb-3"></div>
+
+<div className="flex items-center gap-3 px-3 py-2">
+  <FiMessageCircle className="text-lg text-gray-500" />
+  <span className="text-[14px] font-medium text-gray-400">
+    Recent Chats
+  </span>
+</div>
+          
+          {conversationData?.length > 0 ? (
+            conversationData.map((conversation) => (
+              <button
+                key={conversation.id}
+                onClick={() => handleConversationClick(conversation)}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group ${activeConversation?.id === conversation.id ? "bg-[#262626] text-white" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}
+              >
+                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-xs font-medium">
+                  {conversation.userName ? conversation.userName.charAt(0).toUpperCase() : '?'}
+                </div>
+                <div className="flex flex-col items-start flex-1 overflow-hidden">
+                  <span className="text-[13px] font-medium truncate">{conversation.title || conversation.userName || 'Unknown Chat'}</span>
+                  <span className="text-[11px] text-gray-500 truncate">{conversation.lastMessage || 'No messages yet'}</span>
+                </div>
+              </button>
+            ))
+          ) : (
+            <div className="px-3 py-2 text-[12px] text-gray-500">No recent conversations</div>
+          )}
         </div>
 
-        {/* Bottom Footer Section */}
+        {/* Footer */}
         <div className="p-3 border-t border-white/5 space-y-1">
           <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition-all duration-200 group">
             <FiSettings className="text-lg text-gray-500 group-hover:text-white" />

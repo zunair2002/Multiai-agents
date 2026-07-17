@@ -1,6 +1,7 @@
 import express from "express"
 import dotenv from "dotenv"
 import connectDB from "./config/db.js"
+import router from "./routes/chat.routes.js"
 
 dotenv.config()
 
@@ -13,6 +14,7 @@ app.use(express.json());
 app.get('/',(req,res)=>{
     res.json({message:'hellllo g chat'})
 })
+app.use('/',router)
 
 app.listen((SERVER_PORT),()=>{
 console.log("hello from chat");

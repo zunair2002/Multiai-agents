@@ -1,19 +1,19 @@
 import axios from "axios";
-import {node} from "../graph/node.js"
+import {graph} from "../graph/node.js"
 import { response } from "express";
 export const agentcontroller = async(state)=>{
     try {
         const {prompt,conversationId} = req.body
-        const result = await axios.post(`${process.env.CHAT_URL}/savemessage`,{
+        const resultdata = await axios.post(`${process.env.CHAT_URL}/savemessage`,{
          conversationId,role:"user",content:prompt
         })
-        const result = await node.invoke({
+        const result = await graph.invoke({
             conversationId,
             prompt,
         })
-        const result = result.response
+        const response = result.response
         return res.status(200).json({
-            response:result
+            response:response
         })
 
 
