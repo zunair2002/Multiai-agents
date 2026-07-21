@@ -3,7 +3,8 @@ import { createSlice } from '@reduxjs/toolkit'
 const conversationDataSlice = createSlice({
   name: 'conversationData',
   initialState: {
-    conversationData: []
+    conversationData: [],
+    selectedConversationData: null
   },
   reducers: {
     setConversationData(state, action) {
@@ -11,9 +12,12 @@ const conversationDataSlice = createSlice({
     },
     addConversationData(state, action) {
       state.conversationData.unshift(action.payload)
+    },
+    selectedConversationData(state, action) {
+      state.selectedConversationData = action.payload
     }
   }
 })
 
-export const { addConversationData, setConversationData } = conversationDataSlice.actions
+export const { addConversationData, setConversationData, selectedConversationData } = conversationDataSlice.actions
 export default conversationDataSlice.reducer

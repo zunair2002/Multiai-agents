@@ -4,6 +4,7 @@ import api from '../utils/axiosconfig';
 export const getConversation = async() => {
 try{
     const {data} = await api.get("/api/chat/getconversation/:conversationId")
+    console.log('getConversation data:',data)
     return data
 }
 catch(err){

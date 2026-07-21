@@ -1,8 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { getConversation } from '../features/Getconversations.js'
-import { createConversation } from '../features/Createconversations.js'
-import { useDispatch, useSelector } from 'react-redux'
-import { setConversationData, addConversationData } from '../redux/conversationsdataslice.js'
+import { getConversation } from "../features/Getconversations.js";
+import { createConversation } from "../features/Createconversations.js";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setConversationData,
+  addConversationData,
+  selectedConversationData as setSelectedAction,
+} from "../redux/conversationsdataslice.js";
+import { Logout } from "../features/Logout.js";
+import { setUser } from "../redux/userdatasclice.js";
+import { useNavigate } from 'react-router-dom';
+
 
 import {
   FiSearch,
@@ -10,39 +18,61 @@ import {
   FiUsers,
   FiSettings,
   FiHelpCircle,
-  FiMessageCircle,
-  FiPlus,
+    FiMessageCircle, 
+  FiChevronDown, 
+  FiUser,
+  FiMoreVertical,
+  FiLogOut,
+  FiEdit 
 } from "react-icons/fi";
 
 const Sidebar = () => {
   const dispatch = useDispatch();
-  const conversationData = useSelector((state) => state.conversationData.conversationData);
-  const [activeConversation, setActiveConversation] = useState(null);
+  const navigate = useNavigate();
+
+  const conversationData = useSelector(
+    (state) => state.conversationData.conversationData,
+  );
+  const activeChatFromRedux = useSelector(
+    (state) => state.conversationData.selectedConversationData,
+  );
+  const UserDataFromRedux = useSelector(
+    (state) => state.userData.user,
+  );
+
+  const [showChats, setShowChats] = useState(true);
+  const [showMenu, setShowMenu] = useState(false);
 
   useEffect(() => {
-    const getConversationData = async() => {
-      const data = await getConversation()
+    const getConversationData = async () => {
+      const data = await getConversation();
       if (data) {
-        dispatch(setConversationData(data));
+        dispatch(setConversationData(data.conversation));
       }
-      console.log("Fetched conversations:", data);
-    }
-    getConversationData()
-  }, [dispatch])
+    };
+    getConversationData();
+  }, [dispatch]);
 
   const handleCreateConversation = async () => {
     const newConversation = await createConversation();
     if (newConversation) {
       dispatch(addConversationData(newConversation));
-      setActiveConversation(newConversation);
-      console.log("New conversation created and added to Redux:", newConversation);
+      dispatch(setSelectedAction(newConversation));
     }
-  }
+  };
 
-  const handleConversationClick = (conversation) => {
-    setActiveConversation(conversation);
-    console.log("Selected conversation:", conversation);
+   const handleConversationClick = (conversation) => {
+    dispatch(setSelectedAction(conversation));
+  };
+  
+  const handleLogout = async () => {
+  const success = await Logout();
+
+  if (success) {
+    dispatch(setUser(null));
+    navigate("/login", { replace: true });
   }
+};
 
   const mainMenuItems = [
     { name: "Dashboard", icon: <FiGrid />, active: true },
@@ -50,112 +80,167 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="flex h-screen w-full bg-white font-sans antialiased overflow-hidden">
-      <aside className="w-full h-full bg-[#18181b] flex flex-col border-r border-white/5">
-        {/* Header */}
-        <div className="p-4">
-          <div className="flex items-center justify-between p-2 rounded-xl transition-all duration-200">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center shadow-lg">
-                <img
-                  src="/ailogo.png"
-                  alt="MultiAgents Logo"
-                  className="h-25 w-30 object-contain"
-                />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-white font-medium text-[15px] leading-tight">
-                  MultiAgents
-                </span>
-                <span className="text-gray-500 text-xs">Workspace</span>
-              </div>
-            </div>
-            <button 
-              className="p-1 rounded-full hover:bg-white/10 cursor-pointer transition-all duration-200" 
-              onClick={handleCreateConversation}
-            >
-              <FiPlus className="text-gray-500 text-lg" />
-            </button>
-          </div>
+   <div className="flex h-screen w-full bg-white font-sans antialiased overflow-hidden">
+  <aside className="w-full h-full bg-[#18181b] flex flex-col border-r border-white/5">
+    <div className="p-4 flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <div className="w-9 h-9 flex items-center justify-center">
+          <img
+            src="/ailogo.png"
+            alt="Logo"
+            className="h-full w-full object-contain"
+          />
         </div>
-
-        {/* Search Bar */}
-        <div className="px-4 mb-4">
-          <div className="relative group">
-            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-lg group-focus-within:text-white transition-colors" />
-            <input
-              type="text"
-              placeholder="Search"
-              className="w-full bg-[#1A1A1A] text-sm text-gray-300 pl-10 pr-12 py-2 rounded-lg border border-white/5 focus:border-white/20 outline-none transition-all placeholder:text-gray-600"
-            />
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 bg-[#262626] px-1.5 py-0.5 rounded border border-white/10">
-              <span className="text-[10px] text-gray-500 font-mono">⌘</span>
-              <span className="text-[10px] text-gray-500 font-mono">K</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Navigation Area */}
-        <div className="flex-1 overflow-y-auto px-3 space-y-1 custom-scrollbar">
-          {mainMenuItems.map((item) => (
-            <button
-              key={item.name}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group ${
-                item.active
-                  ? "bg-[#262626] text-white shadow-sm"
-                  : "text-gray-400 hover:bg-white/5 hover:text-white"
-              }`}
-            >
-              <span className={`text-lg transition-colors ${item.active ? "text-white" : "text-gray-500 group-hover:text-white"}`}>
-                {item.icon}
-              </span>
-              <span className="text-[14px] font-medium">{item.name}</span>
-            </button>
-          ))}
-
-<div className="border-t border-white/5 -mx-3 mb-3"></div>
-
-<div className="flex items-center gap-3 px-3 py-2">
-  <FiMessageCircle className="text-lg text-gray-500" />
-  <span className="text-[14px] font-medium text-gray-400">
-    Recent Chats
-  </span>
-</div>
-          
-          {conversationData?.length > 0 ? (
-            conversationData.map((conversation) => (
-              <button
-                key={conversation.id}
-                onClick={() => handleConversationClick(conversation)}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group ${activeConversation?.id === conversation.id ? "bg-[#262626] text-white" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}
-              >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-xs font-medium">
-                  {conversation.userName ? conversation.userName.charAt(0).toUpperCase() : '?'}
-                </div>
-                <div className="flex flex-col items-start flex-1 overflow-hidden">
-                  <span className="text-[13px] font-medium truncate">{conversation.title || conversation.userName || 'Unknown Chat'}</span>
-                  <span className="text-[11px] text-gray-500 truncate">{conversation.lastMessage || 'No messages yet'}</span>
-                </div>
-              </button>
-            ))
-          ) : (
-            <div className="px-3 py-2 text-[12px] text-gray-500">No recent conversations</div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="p-3 border-t border-white/5 space-y-1">
-          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition-all duration-200 group">
-            <FiSettings className="text-lg text-gray-500 group-hover:text-white" />
-            <span className="text-[14px] font-medium">Settings</span>
-          </button>
-          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:bg-white/5 hover:text-white transition-all duration-200 group">
-            <FiHelpCircle className="text-lg text-gray-500 group-hover:text-white" />
-            <span className="text-[14px] font-medium">Help & Support</span>
-          </button>
-        </div>
-      </aside>
+      </div>
+      <div className="flex items-center gap-3">
+        <button className="p-1 text-white hover:text-white transition-colors">
+          <FiSearch size={18} />
+        </button>
+        <button className="p-1 text-white hover:text-white transition-colors">
+          <svg
+            stroke="currentColor"
+            fill="none"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            height="18"
+            width="18"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect>
+            <line x1="9" x2="9" y1="3" y2="21"></line>
+          </svg>
+        </button>
+      </div>
     </div>
+
+    <div className="px-3 mb-2">
+      <button
+  onClick={handleCreateConversation}
+  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-white hover:bg-[#262626] transition-all duration-200 group"
+>
+  <FiEdit className="text-white group-hover:text-white text-lg" />
+
+  <span className="text-[14px] font-medium">
+    New chat
+  </span>
+</button>
+    </div>
+
+    <div className="flex-1 overflow-y-auto px-3 space-y-1 custom-scrollbar [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      {mainMenuItems.map((item) => (
+        <button
+          key={item.name}
+          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group ${
+            item.active
+              ? "text-white hover:bg-white/5 hover:text-white"
+              : "text-white hover:bg-white/5 hover:text-white"
+          }`}
+        >
+          <span className={`text-lg transition-colors ${item.active ? "text-white" : "text-white"}`}>
+            {item.icon}
+          </span>
+          <span className="text-[14px] font-medium">{item.name}</span>
+        </button>
+      ))}
+
+      <div className="border-t border-white/5 -mx-3 mb-3"></div>
+
+      <div className="w-full">
+        <button
+          onClick={() => setShowChats(!showChats)}
+          className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-white hover:bg-[#262626] transition-all duration-200 group"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-[14px] font-medium">Recent Chats</span>
+          </div>
+          <FiChevronDown className={`text-white transition-transform duration-300 ${showChats ? "rotate-180" : ""}`} />
+        </button>
+
+        <div className={`grid transition-all duration-300 ease-in-out ${showChats ? "grid-rows-[1fr] opacity-100 mt-2" : "grid-rows-[0fr] opacity-0"}`}>
+          <div className="overflow-hidden space-y-1">
+            {conversationData?.length > 0 ? (
+              conversationData.map((conversation, index) => {
+                const isActive = activeChatFromRedux?.id === conversation.id;
+                return (
+                  <button
+                    key={conversation.id || index}
+                    onClick={() => handleConversationClick(conversation)}
+                    className={`w-full rounded-lg px-3 py-2 text-left transition-all duration-200 ${
+                      isActive ? "bg-transparent hover:bg-white/5 hover:text-white font-medium text-white" : "text-white/70 hover:bg-white/5 hover:text-white font-medium"
+                    }`}
+                  >
+                    <p className="text-xs truncate">
+                      {conversation.title || conversation.name || "New Chat"}
+                    </p>
+                  </button>
+                );
+              })
+            ) : (
+              <p className="px-3 py-2 text-[11px] font-medium text-white/50">No recent chats</p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div className="p-3 border-t border-white/5 space-y-2">
+      <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-white hover:bg-white/5 transition-all duration-200 group">
+        <FiSettings className="text-lg text-white" />
+        <span className="text-[13px] font-medium">Settings</span>
+      </button>
+
+      <div className="relative">
+        <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-white/[0.03] border border-white/5 transition-all duration-200">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="relative">
+              {UserDataFromRedux?.avatar ? (
+                <img
+                  src={UserDataFromRedux.avatar}
+                  alt="Profile"
+                  className="w-5 h-5 rounded-full object-cover border border-white/10"
+                />
+              ) : (
+                <div className="w-5 h-5 rounded-lg bg-zinc-800 flex items-center justify-center border border-white/10">
+                  <FiUser className="text-white text-[12px]" />
+                </div>
+              )}
+            </div>
+            <div className="min-w-0 flex flex-col gap-1">
+              <p className="text-[10px] text-white font-medium leading-none">
+                {UserDataFromRedux?.name || UserDataFromRedux?.fullName || "User"}
+              </p>
+              <span className="inline-flex text-[8px] text-gray-500 font-medium leading-none">
+                Free
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              className={`p-1.5 rounded-lg transition-colors ${showMenu ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
+            >
+              <FiMoreVertical className="text-sm" />
+            </button>
+          </div>
+        </div>
+
+        {showMenu && (
+          <div className="absolute bottom-full left-0 right-0 mb-2 p-1 rounded-xl border border-white/10 bg-[#1f1f1f] shadow-2xl z-50 backdrop-blur-xl animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-2 px-3 py-2.5 text-[12px] text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-150 group"
+            >
+              <FiLogOut className="text-sm transition-transform group-hover:translate-x-0.5" />
+              <span className="font-medium">Log out</span>
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  </aside>
+</div>
   );
 };
 

@@ -6,11 +6,14 @@ import cookieParser from "cookie-parser"
 import protect from "./middleware/auth.middleware.js"
 import {currentuser} from "./controller/auth.controller.js"
 import {proxyheader} from "./utils/proxyheader.js"
+import morgan from "morgan"
 
 dotenv.config()
 
 const SERVER_PORT = process.env.PORT
 const app = express()
+app.use(morgan('dev'))
+
 app.use(cors({origin:process.env.FRONTEND_URL,credentials:true}));
 app.use(cookieParser());
 app.use(express.json());
