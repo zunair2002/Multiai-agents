@@ -11,7 +11,7 @@ export const agentcontroller = async (req, res) => {
         await axios.post(`${process.env.CHAT_URL}/savemessage`, {
             conversationId,
             role: "user",
-            input: prompt
+            content: prompt
         });
 
         const result = await graph.invoke({
@@ -20,6 +20,11 @@ export const agentcontroller = async (req, res) => {
         });
 
         const agentResponse = result.response; 
+        await axios.post(`${process.env.CHAT_URL}/savemessage`, {
+            conversationId,
+            role: "assistant",
+            content: agentResponse
+        });
         return res.status(200).json({
             response: agentResponse
         });

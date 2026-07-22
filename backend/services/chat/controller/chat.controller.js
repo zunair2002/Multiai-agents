@@ -64,8 +64,6 @@ export const getMessage = async(req,res)=>{
         const conversationId = req.params.conversationId
         const messages = await Message.find({
             conversationId:conversationId,
-        }).sort({
-            createdAt:-1
         })
         return res.status(200).json({message:'Message found successfully',messages})
     }

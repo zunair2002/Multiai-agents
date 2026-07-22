@@ -14,11 +14,6 @@ const Navbar = () => {
   </div>
 
   <div className="flex items-center gap-5">
-    <button className="flex items-center gap-1.5 text-sky-400 hover:text-sky-300 transition">
-      <HiSparkles className="text-base" />
-      <span className="text-sm font-medium">Upgrade</span>
-    </button>
-
     <button className="hover:text-gray-300 transition">
       <FiUpload className="text-lg" />
     </button>

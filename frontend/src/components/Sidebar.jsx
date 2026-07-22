@@ -18,12 +18,14 @@ import {
   FiUsers,
   FiSettings,
   FiHelpCircle,
-    FiMessageCircle, 
+  FiMessageCircle, 
   FiChevronDown, 
   FiUser,
   FiMoreVertical,
   FiLogOut,
-  FiEdit 
+  FiEdit,
+  FiSun,
+  FiMoon
 } from "react-icons/fi";
 
 const Sidebar = () => {
@@ -40,7 +42,7 @@ const Sidebar = () => {
     (state) => state.userData.user,
   );
 
-  const [showChats, setShowChats] = useState(true);
+  const [showChats, setShowChats] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
   useEffect(() => {
@@ -81,7 +83,7 @@ const Sidebar = () => {
 
   return (
    <div className="flex h-screen w-full bg-white font-sans antialiased overflow-hidden">
-  <aside className="w-full h-full bg-[#18181b] flex flex-col border-r border-white/5">
+  <aside className="w-full h-full bg-[#000000] flex flex-col border-r border-white/10">
     <div className="p-4 flex items-center justify-between">
       <div className="flex items-center gap-2">
         <div className="w-9 h-9 flex items-center justify-center">
@@ -93,10 +95,10 @@ const Sidebar = () => {
         </div>
       </div>
       <div className="flex items-center gap-3">
-        <button className="p-1 text-white hover:text-white transition-colors">
-          <FiSearch size={18} />
+        <button className="p-1 text-white hover:text-white transition-colors cursor-pointer">
+          <FiSearch size={18} /> 
         </button>
-        <button className="p-1 text-white hover:text-white transition-colors">
+        <button className="p-1 text-white hover:text-white transition-colors cursor-pointer">
           <svg
             stroke="currentColor"
             fill="none"
@@ -118,7 +120,7 @@ const Sidebar = () => {
     <div className="px-3 mb-2">
       <button
   onClick={handleCreateConversation}
-  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-white hover:bg-[#262626] transition-all duration-200 group"
+  className="w-full flex items-center cursor-pointer gap-3 px-3 py-2 rounded-lg text-white hover:bg-[#262626] transition-all duration-200 group"
 >
   <FiEdit className="text-white group-hover:text-white text-lg" />
 
@@ -132,10 +134,10 @@ const Sidebar = () => {
       {mainMenuItems.map((item) => (
         <button
           key={item.name}
-          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group ${
+          className={`w-full cursor-pointer flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group ${
             item.active
-              ? "text-white hover:bg-white/5 hover:text-white"
-              : "text-white hover:bg-white/5 hover:text-white"
+              ? "text-white hover:bg-[#262626] hover:text-white"
+              : "text-white hover:bg-[#262626] hover:text-white"
           }`}
         >
           <span className={`text-lg transition-colors ${item.active ? "text-white" : "text-white"}`}>
@@ -145,7 +147,7 @@ const Sidebar = () => {
         </button>
       ))}
 
-      <div className="border-t border-white/5 -mx-3 mb-3"></div>
+      <div className="border-t border-white/10 -mx-3 mb-3"></div>
 
       <div className="w-full">
         <button
@@ -167,7 +169,7 @@ const Sidebar = () => {
                   <button
                     key={conversation.id || index}
                     onClick={() => handleConversationClick(conversation)}
-                    className={`w-full rounded-lg px-3 py-2 text-left transition-all duration-200 ${
+                    className={`w-full rounded-lg cursor-pointer px-3 py-2 text-left transition-all duration-200 ${
                       isActive ? "bg-transparent hover:bg-white/5 hover:text-white font-medium text-white" : "text-white/70 hover:bg-white/5 hover:text-white font-medium"
                     }`}
                   >
@@ -185,8 +187,8 @@ const Sidebar = () => {
       </div>
     </div>
 
-    <div className="p-3 border-t border-white/5 space-y-2">
-      <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-white hover:bg-white/5 transition-all duration-200 group">
+    <div className="p-3 border-t border-white/10 space-y-2">
+      <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer text-white hover:bg-[#262626] transition-all duration-200 group">
         <FiSettings className="text-lg text-white" />
         <span className="text-[13px] font-medium">Settings</span>
       </button>
@@ -219,7 +221,7 @@ const Sidebar = () => {
           <div className="flex items-center gap-1">
             <button
               onClick={() => setShowMenu(!showMenu)}
-              className={`p-1.5 rounded-lg transition-colors ${showMenu ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
+              className={`p-1.5 rounded-lg transition-colors ${showMenu ? 'bg-white/10 text-white cursor-pointer' : 'text-gray-400 hover:bg-white/5 hover:text-white cursor-pointer'}`}
             >
               <FiMoreVertical className="text-sm" />
             </button>
@@ -227,15 +229,15 @@ const Sidebar = () => {
         </div>
 
         {showMenu && (
-          <div className="absolute bottom-full left-0 right-0 mb-2 p-1 rounded-xl border border-white/10 bg-[#1f1f1f] shadow-2xl z-50 backdrop-blur-xl animate-in fade-in slide-in-from-bottom-2 duration-200">
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-2 px-3 py-2.5 text-[12px] text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-150 group"
-            >
-              <FiLogOut className="text-sm transition-transform group-hover:translate-x-0.5" />
-              <span className="font-medium">Log out</span>
-            </button>
-          </div>
+          <div className="absolute bottom-full left-0 right-0 mb-2 p-0 rounded-xl border border-white/4 bg-[#0d0d0d] shadow-xl z-50 backdrop-blur-xl animate-in fade-in slide-in-from-bottom-2 duration-200">
+  <button
+    onClick={handleLogout}
+    className="w-full flex items-center gap-2 px-3 py-2.5 text-[12px] text-red-500 hover:bg-[#222222] hover:cursor-pointer transition-all duration-150 group rounded-xl"
+  >
+    <FiLogOut className="text-sm transition-transform duration-300" />
+    <span className="font-medium">Log out</span>
+  </button>
+</div>
         )}
       </div>
     </div>
