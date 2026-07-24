@@ -1,43 +1,42 @@
 import React, { useEffect, useState } from "react";
 import { FiMic, FiArrowUp, FiGrid, FiStar } from "react-icons/fi";
 import { useSelector, useDispatch } from "react-redux";
-import { setMessagesData } from "../redux/messagesdataslice.js";
+import { setMessagesData, addMessagesData } from "../redux/messagesdataslice.js";
 import { sendMessages } from "../features/AIapi/Sendmessages.js";
 import { getMessages } from "../features/Getmessages.js";
+import { updateConversationTitle } from "../features/UpdateConverationTitle.js";
+import { updatetitle } from "../redux/conversationsdataslice.js";
+import Markdown from "react-markdown";
 import Navbar from "./Navbar.jsx";
 
 const Messagesportion = () => {
   const [value, setvalue] = useState("");
+  const [titleSet, setTitleSet] = useState({});
   const dispatch = useDispatch();
   const activeChatFromRedux = useSelector(
     (state) => state.conversationData.selectedConversationData,
   );
-   const UserDataFromRedux = useSelector(
-      (state) => state.userData.user,
-    );
-
   const messagesData = useSelector((state) => state.messagesData.messagesData);
+
   const categories = [
-    "Searching",
-    "General",
-    "Brainstorming",
-    "Summarize PDF",
-    "Trending",
-    "Internet search",
-    "Latest news",
+    "Searching", "General", "Brainstorming", "Summarize PDF", "Trending", "Internet search", "Latest news",
   ];
   const bottomTabs = ["Research", "PDF", "General"];
 
   useEffect(() => {
     const fetchMessages = async () => {
-      if (!activeChatFromRedux?._id) return;
+      if (!activeChatFromRedux?._id) {
+        dispatch(setMessagesData({ messages: [] }));
+        return;
+      }
 
       try {
+        dispatch(setMessagesData({ messages: [] }));
         const data = await getMessages(activeChatFromRedux._id);
-        console.log('useeffect sy data:',data)
-        dispatch(setMessagesData(data.messages));
+        dispatch(setMessagesData(data));
       } catch (err) {
         console.log(err);
+        dispatch(setMessagesData({ messages: [] }));
       }
     };
 
@@ -45,18 +44,41 @@ const Messagesportion = () => {
   }, [activeChatFromRedux?._id, dispatch]);
 
   const handleSendMessage = async () => {
+    const chatId = activeChatFromRedux?._id || activeChatFromRedux?.id;
+    if (!chatId) {
+        console.error("Conversation ID not found. Please wait or refresh.");
+        return;
+    }
     if (!value.trim()) return;
 
+    const promptText = value.trim();
+    const userMessage = {
+      role: "user",
+      content: promptText,
+      createdAt: new Date().toISOString(),
+    };
+
+    dispatch(addMessagesData(userMessage));
+    setvalue("");
+
+     if ((!activeChatFromRedux?.title || activeChatFromRedux?.title === "New Chat") && !titleSet[chatId]) {
+        const generatedTitle = promptText.length > 30 ? promptText.substring(0, 30) + "..." : promptText;
+        
+        // Use chatId here
+        updateConversationTitle({ id: chatId, title: generatedTitle });
+        dispatch(updatetitle({ conversationId: chatId, title: generatedTitle }));
+        setTitleSet(prev => ({ ...prev, [chatId]: true }));
+    }
+
     const payload = {
-      prompt: value.trim(),
-      conversationId: activeChatFromRedux?._id,
+      prompt: promptText,
+      conversationId: chatId,
     };
 
     try {
-      setvalue("");
       await sendMessages(payload);
-      const data = await getMessages(activeChatFromRedux._id);
-      dispatch(setMessagesData(data.messages));
+      const data = await getMessages(chatId);
+      dispatch(setMessagesData(data));
     } catch (err) {
       console.log(err);
     }
@@ -69,53 +91,54 @@ const Messagesportion = () => {
           <Navbar />
           <div className="flex-1 w-full flex flex-col overflow-hidden pt-2">
             <div className="flex-1 w-full max-w-3xl mx-auto overflow-y-auto px-6 custom-scrollbar [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-  {messagesData && messagesData.messages && messagesData.messages.length > 0 ? (
-    <div className="space-y-6 py-6 flex flex-col">
-      {messagesData.messages.map((message, index) => (
-        <div
-  key={index}
-  className={`flex ${
-    message.role === "user"
-      ? "justify-end"
-      : "justify-start"
-  }`}
->
-  <div className="max-w-[85%] flex flex-col">
-    <div
-      className={`text-[14px] leading-relaxed ${
-        message.role === "user"
-          ? "text-white"
-          : "text-gray-200"
-      }`}
-    >
-      {message.content}
-    </div>
+              {messagesData &&
+              messagesData.messages &&
+              messagesData.messages.length > 0 ? (
+                <div className="space-y-6 py-6 flex flex-col">
+                  {messagesData.messages.map((message, index) => (
+                    <div
+                      key={index}
+                      className={`flex ${
+                        message.role === "user"
+                          ? "justify-end"
+                          : "justify-start"
+                      }`}
+                    >
+                      <div className="max-w-[85%] flex flex-col">
+                        <div
+                          className={`text-[14px] leading-relaxed ${
+                            message.role === "user"
+                              ? "text-white"
+                              : "text-gray-200"
+                          }`}
+                        >
+                          <Markdown>
+                            {message.content}
+                          </Markdown>
+                        </div>
 
-    <span
-      className={`text-[9px] text-gray-500 mt-1 ${
-        message.role === "user"
-          ? "text-right"
-          : "text-left"
-      }`}
-    >
-      {new Date(message.createdAt).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      })}
-    </span>
-  </div>
-</div>
-        
-      ))}
-    </div>
-  ) : (
-    <div className="flex items-center justify-center h-full">
-      <p className="text-white/40 text-sm">
-        Start a new conversation...
-      </p>
-    </div>
-  )}
-</div>
+                        <span
+                          className={`text-[9px] text-gray-500 mt-1 ${
+                            message.role === "user" ? "text-right" : "text-left"
+                          }`}
+                        >
+                          {new Date(message.createdAt).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-white/40 text-sm">
+                    Start a new conversation...
+                  </p>
+                </div>
+              )}
+            </div>
 
             <div className="w-full max-w-3xl mx-auto px-6 pb-5">
               <div className="w-full bg-[#080808] rounded-2xl border border-white/5 p-2 flex items-center gap-2">
@@ -136,13 +159,14 @@ const Messagesportion = () => {
                   disabled={!value.trim()}
                   onClick={handleSendMessage}
                   className={`p-2.5 rounded-xl transition-colors ${
-                    value.trim() ? "bg-white hover:bg-gray-200" : "bg-gray-500 cursor-not-allowed"
+                    value.trim()
+                      ? "bg-white hover:bg-gray-200"
+                      : "bg-gray-500 cursor-not-allowed"
                   }`}
                 >
                   <FiArrowUp className="text-black" />
                 </button>
               </div>
-
               <p className="text-center text-[10px] text-white/40 mt-2">
                 AI may display inaccurate info, so double-check its responses.
               </p>
@@ -156,7 +180,10 @@ const Messagesportion = () => {
               <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
                 Enhance your{" "}
                 <span className="relative inline-block">
-                  <FiStar className="absolute -top-1 -right-4 rotate-12 text-[#8917d5]" size={16} />
+                  <FiStar
+                    className="absolute -top-1 -right-4 rotate-12 text-[#8917d5]"
+                    size={16}
+                  />
                   <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#7C3AED] via-[#8917d5] to-[#5B6CFF]">
                     Productivity
                   </span>
@@ -178,7 +205,9 @@ const Messagesportion = () => {
           </div>
 
           <div className="flex-1 flex items-center justify-center">
-            <h2 className="text-3xl md:text-5xl font-bold text-[#262626]">Ready when you are.</h2>
+            <h2 className="text-3xl md:text-5xl font-bold text-[#262626]">
+              Ready when you are.
+            </h2>
           </div>
 
           <div className="w-full max-w-2xl flex flex-col items-center mb-6">
@@ -187,7 +216,9 @@ const Messagesportion = () => {
                 <button
                   key={i}
                   className={`px-4 py-1 rounded-full text-[11px] font-medium transition-all ${
-                    i === 0 ? "bg-white text-black" : "text-gray-400 hover:text-white"
+                    i === 0
+                      ? "bg-white text-black"
+                      : "text-gray-400 hover:text-white"
                   }`}
                 >
                   {tab}

@@ -1,16 +1,32 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice } from "@reduxjs/toolkit";
 
 const messagesDataSlice = createSlice({
-  name: 'messagesData',
+  name: "messagesData",
   initialState: {
-    messagesData: [],
+    messagesData: {
+      messages: [],
+    },
   },
   reducers: {
     setMessagesData(state, action) {
-      state.messagesData = action.payload
-    },
-  }
-})
+      const payload = action.payload;
+      const messages = Array.isArray(payload)
+        ? payload
+        : Array.isArray(payload?.messages)
+        ? payload.messages
+        : [];
 
-export const { setMessagesData } = messagesDataSlice.actions
-export default messagesDataSlice.reducer
+      state.messagesData = { messages };
+    },
+
+    addMessagesData(state, action) {
+      if (!state.messagesData || !Array.isArray(state.messagesData.messages)) {
+        state.messagesData = { messages: [] };
+      }
+      state.messagesData.messages.push(action.payload);
+    },
+  },
+});
+
+export const { setMessagesData, addMessagesData } = messagesDataSlice.actions;
+export default messagesDataSlice.reducer;

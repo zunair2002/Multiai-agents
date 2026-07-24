@@ -6,7 +6,7 @@ export const createConversation = async(req,res)=>{
         const userID = req.headers['x-user-id']
         const conversation = await Conversation.create({
             userID,
-        })
+        });
         return res.status(201).json({message:'Conversation created successfully',conversation})
     }
     catch(err){
@@ -49,10 +49,10 @@ export const saveMessage = async(req,res)=>{
 export const updateMessage = async(req,res)=>{
     try{
        const {id,title} = req.body
-       const messages = await Message.findByIdAndUpdate(id,{
+       const conversation = await Conversation.findByIdAndUpdate(id,{
             title,
-       })
-        return res.status(200).json({message:'Message updated successfully',messages})
+       }, { new: true })
+        return res.status(200).json({message:'Conversation title updated successfully',conversation})
     }
     catch(err){
         return res.status(500).json({message:err.message})

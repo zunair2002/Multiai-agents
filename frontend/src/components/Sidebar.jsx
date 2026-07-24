@@ -41,9 +41,11 @@ const Sidebar = () => {
   const UserDataFromRedux = useSelector(
     (state) => state.userData.user,
   );
+  
 
   const [showChats, setShowChats] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+
 
   useEffect(() => {
     const getConversationData = async () => {
@@ -54,12 +56,15 @@ const Sidebar = () => {
     };
     getConversationData();
   }, [dispatch]);
+  
 
   const handleCreateConversation = async () => {
     const newConversation = await createConversation();
-    if (newConversation) {
-      dispatch(addConversationData(newConversation));
-      dispatch(setSelectedAction(newConversation));
+    const newConvo = newConversation?.conversation || newConversation; 
+
+    if (newConvo) {
+      dispatch(addConversationData(newConvo));
+      dispatch(setSelectedAction(newConvo));
     }
   };
 
@@ -129,7 +134,6 @@ const Sidebar = () => {
   </span>
 </button>
     </div>
-
     <div className="flex-1 overflow-y-auto px-3 space-y-1 custom-scrollbar [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
       {mainMenuItems.map((item) => (
         <button
@@ -180,7 +184,7 @@ const Sidebar = () => {
                 );
               })
             ) : (
-              <p className="px-3 py-2 text-[11px] font-medium text-white/50">No recent chats</p>
+              <p className="px-3 text-[10px] font-medium text-white">No conversation yet.</p>
             )}
           </div>
         </div>

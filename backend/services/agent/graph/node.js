@@ -36,7 +36,7 @@ workflow.addConditionalEdges("router",(state)=>{
     chat:"chat",
 })
 
-workflow.addEdge("search","chat")
+workflow.addEdge("search","__end__")
 workflow.addEdge("pdf","__end__")
 workflow.addEdge("chat","__end__")  
 

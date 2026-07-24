@@ -5,7 +5,7 @@ const router = express.Router()
 
 router.get('/createconversation',createConversation)
 router.post('/savemessage',saveMessage)
-router.post('/updatessage/:id',updateMessage)
+router.post('/updatessage',updateMessage)
 router.get('/getconversation/:conversationId',getConversation)
 router.get('/getmessage/:conversationId',getMessage)
 

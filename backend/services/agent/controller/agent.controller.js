@@ -1,38 +1,21 @@
 import axios from "axios";
 import { graph } from "../graph/node.js";
+import { addMessage } from "../config/memory.js";
+
+
 
 export const agentcontroller = async (req, res) => { 
-  console.log(req.body);
-  const { prompt, conversationId } = req.body;
-  console.log("BODY:", req.body);
-  console.log(prompt, conversationId);
-
-    try {
-        await axios.post(`${process.env.CHAT_URL}/savemessage`, {
-            conversationId,
-            role: "user",
-            content: prompt
-        });
-
-        const result = await graph.invoke({
+    const { prompt, conversationId } = req.body;
+    await axios.post(`${process.env.CHAT_URL}/savemessage`, { conversationId, role: "user", content: prompt });
+    const result = await graph.invoke({
             conversationId,
             prompt,
         });
 
-        const agentResponse = result.response; 
-        await axios.post(`${process.env.CHAT_URL}/savemessage`, {
-            conversationId,
-            role: "assistant",
-            content: agentResponse
-        });
-        return res.status(200).json({
-            response: agentResponse
-        });
+    const agentResponse = result.response; 
+    await addMessage(conversationId, "user", prompt);
+    await addMessage(conversationId, "assistant", agentResponse);
+    await axios.post(`${process.env.CHAT_URL}/savemessage`, { conversationId, role: "assistant", content: agentResponse });
 
-    } catch (error) {
-        console.error("Agent controller error:", error); 
-        return res.status(500).json({
-            error: error.message
-        });
-    }
+    return res.status(200).json({ response: agentResponse });
 };
