@@ -1,11 +1,12 @@
 import { AIMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { getModels } from "./config/llmmodels.js";
-import { getMemory } from "./config/memory.js";
+import { getMemory, addMessage } from "./config/memory.js";
 
-
-export const chatagent = async(state) => {
+export const chatagent = async (state) => {
     const LLM = await getModels("chat");
-     const systemprompt = `
+    const agentKey = "chat"; // This agent's key
+
+    const systemprompt = `
     You are 'MultiAgent', a sophisticated and professional AI assistant.
 
     **Your Identity:**
@@ -38,29 +39,37 @@ export const chatagent = async(state) => {
     - Avoid walls of text, unnecessary repetition, decorative formatting, excessive emojis, and ASCII characters.
     - Adapt the format to the user's question instead of following a fixed template.
     - Every response should feel natural, easy to scan, and visually clean, similar to a modern AI assistant.`;
+    
 
+    // 1. Get this agent's dedicated memory
+    const history = await getMemory(state.conversationId, agentKey);
+    const messages = [new SystemMessage(systemprompt)];
 
-    const history = await getMemory(state.conversationId);
-    const messages = [
-        new SystemMessage(systemprompt)
-    ]
-    // Add safety check to ensure history is an array
     if (history && Array.isArray(history)) {
         history.forEach(item => {
-            if (item.role === "user") {
-                messages.push(new HumanMessage(item.content));
-            } else {
-                messages.push(new AIMessage(item.content));
+            if (item && item.content) {
+                if (item.role === "user") {
+                    messages.push(new HumanMessage(item.content));
+                } else {
+                    messages.push(new AIMessage(item.content));
+                }
             }
         });
     }
     messages.push(new HumanMessage(state.prompt));
-    console.log('chat agent sy messages:',messages)
-   
+
+    // 2. Add user's prompt to this agent's memory
+    await addMessage(state.conversationId, agentKey, "user", state.prompt);
+
     const response = await LLM.invoke(messages);
+    const agentResponse = response.content;
+
+    // 3. Add assistant's response to this agent's memory
+    await addMessage(state.conversationId, agentKey, "assistant", agentResponse);
     
     return {
         ...state,
-        response: response.content
+        response: agentResponse
     };
 };
+ 

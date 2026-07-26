@@ -19,22 +19,28 @@ workflow.addNode("chat",chatagent)
 //ab workflow ko apis ,may connect krna
 
 workflow.addEdge("__start__","router")
-workflow.addConditionalEdges("router",(state)=>{
-    switch(state.agentkey){
-        case "search":
-            return "search"
-        case "pdf":
-            return "pdf"
-        case "chat":
-            return "chat"
-        default:
-            return "chat"
+workflow.addConditionalEdges(
+  "router",
+  (state) => {
+    console.log("State Agent:", state.agentkey);
+
+    switch (state.agentkey) {
+      case "search":
+        return "search";
+      case "pdf":
+        return "pdf";
+      case "chat":
+        return "chat";
+      default:
+        return "chat";
     }
-},{
-    search:"search",
-    pdf:"pdf",
-    chat:"chat",
-})
+  },
+  {
+    search: "search",
+    pdf: "pdf",
+    chat: "chat",
+  }
+);
 
 workflow.addEdge("search","__end__")
 workflow.addEdge("pdf","__end__")

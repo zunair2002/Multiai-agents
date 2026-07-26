@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FiMic, FiArrowUp, FiGrid, FiStar } from "react-icons/fi";
+import { FiMic, FiArrowUp, FiGrid, FiStar ,FiPlus, FiGlobe, FiImage, FiMessageSquare, FiFileText, FiZap } from "react-icons/fi";
 import { useSelector, useDispatch } from "react-redux";
 import { setMessagesData, addMessagesData } from "../redux/messagesdataslice.js";
 import { sendMessages } from "../features/AIapi/Sendmessages.js";
@@ -12,6 +12,8 @@ import Navbar from "./Navbar.jsx";
 const Messagesportion = () => {
   const [value, setvalue] = useState("");
   const [titleSet, setTitleSet] = useState({});
+  const [showMenu, setShowMenu] = useState(false);
+  const [selectedTool, setSelectedTool] = useState("Auto");
   const dispatch = useDispatch();
   const activeChatFromRedux = useSelector(
     (state) => state.conversationData.selectedConversationData,
@@ -22,6 +24,28 @@ const Messagesportion = () => {
     "Searching", "General", "Brainstorming", "Summarize PDF", "Trending", "Internet search", "Latest news",
   ];
   const bottomTabs = ["Research", "PDF", "General"];
+  const menuItems = [
+  {
+    title: "Auto",
+    description: "Automatically choose the best tool",
+    icon: FiZap,
+  },
+  {
+    title: "Chat Agent",
+    description: "Ask your AI assistant anything",
+    icon: FiMessageSquare,
+  },
+  {
+    title: "PDF Chat",
+    description: "Chat with your PDF documents",
+    icon: FiFileText,
+  },
+  {
+    title: "Web Search",
+    description: "Search real-time information",
+    icon: FiGlobe,
+  }
+];
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -73,6 +97,7 @@ const Messagesportion = () => {
     const payload = {
       prompt: promptText,
       conversationId: chatId,
+      agentkey: selectedTool.toLowerCase()
     };
 
     try {
@@ -141,36 +166,89 @@ const Messagesportion = () => {
             </div>
 
             <div className="w-full max-w-3xl mx-auto px-6 pb-5">
-              <div className="w-full bg-[#080808] rounded-2xl border border-white/5 p-2 flex items-center gap-2">
-                <button className="p-2.5 rounded-xl hover:bg-white/5">
-                  <FiMic className="text-gray-500" />
-                </button>
+  <div className="relative w-full bg-[#080808] rounded-2xl border border-white/5 p-2 flex items-center gap-2">
 
-                <input
-                  type="text"
-                  placeholder="Message MultiAgents..."
-                  value={value}
-                  onChange={(e) => setvalue(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-                  className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-gray-500"
-                />
+    {/* Plus Button */}
+    <button
+      onClick={() => setShowMenu(!showMenu)}
+      className="p-2.5 rounded-xl hover:bg-white/5 transition cursor-pointer"
+    >
+      <FiPlus className="text-white" />
+    </button>
 
-                <button
-                  disabled={!value.trim()}
-                  onClick={handleSendMessage}
-                  className={`p-2.5 rounded-xl transition-colors ${
-                    value.trim()
-                      ? "bg-white hover:bg-gray-200"
-                      : "bg-gray-500 cursor-not-allowed"
-                  }`}
-                >
-                  <FiArrowUp className="text-black" />
-                </button>
-              </div>
-              <p className="text-center text-[10px] text-white/40 mt-2">
-                AI may display inaccurate info, so double-check its responses.
-              </p>
-            </div>
+    {/* Toggle Menu */}
+    {showMenu && (
+  <div className="absolute bottom-16 left-0 w-72 overflow-hidden rounded-2xl border border-white/5 bg-[#080808] backdrop-blur-xl shadow-2xl z-50">
+
+  {menuItems.map((item, index) => (
+  <div key={index}>
+    <button
+      onClick={() => {
+        setSelectedTool(item.title);
+        setShowMenu(false);
+      }}
+      className={`group flex w-full items-center gap-4 px-4 py-3 transition cursor-pointer ${
+        selectedTool === item.title
+          ? "bg-[#262626]"
+          : "hover:bg-[#262626]"
+      }`}
+    >
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5">
+        <item.icon className="text-lg text-white" />
+      </div>
+
+      <div className="text-left">
+        <p className="text-xs font-medium text-white">
+          {item.title}
+        </p>
+        <p className="text-[10px] text-white/45">
+          {item.description}
+        </p>
+      </div>
+    </button>
+
+    {index !== menuItems.length - 1 && (
+      <div className="border-t border-white/10" />
+    )}
+  </div>
+))}
+
+  </div>
+)}
+
+    {/* Input */}
+    <input
+      type="text"
+      placeholder="Message MultiAgents..."
+      value={value}
+      onChange={(e) => setvalue(e.target.value)}
+      onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+      className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-gray-500"
+    />
+
+    {/* Mic */}
+    <button className="p-2.5 rounded-xl hover:bg-white/5">
+      <FiMic className="text-white" />
+    </button>
+
+    {/* Send */}
+    <button
+      disabled={!value.trim()}
+      onClick={handleSendMessage}
+      className={`p-2.5 rounded-xl transition-colors ${
+        value.trim()
+          ? "bg-white hover:bg-gray-200"
+          : "bg-gray-500 cursor-not-allowed"
+      }`}
+    >
+      <FiArrowUp className="text-black" />
+    </button>
+  </div>
+
+  <p className="text-center text-[10px] text-white/40 mt-2">
+    AI may display inaccurate info, so double-check its responses.
+  </p>
+</div>
           </div>
         </>
       ) : (

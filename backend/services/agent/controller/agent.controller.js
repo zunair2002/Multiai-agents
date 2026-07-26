@@ -1,20 +1,22 @@
 import axios from "axios";
 import { graph } from "../graph/node.js";
-import { addMessage } from "../config/memory.js";
 
+export const agentcontroller = async (req, res) => {
+    const { prompt, conversationId, agentkey } = req.body;
 
-
-export const agentcontroller = async (req, res) => { 
-    const { prompt, conversationId } = req.body;
+    // Save the user's message to the main database (this is correct)
     await axios.post(`${process.env.CHAT_URL}/savemessage`, { conversationId, role: "user", content: prompt });
-    const result = await graph.invoke({
-            conversationId,
-            prompt,
-        });
 
-    const agentResponse = result.response; 
-    await addMessage(conversationId, "user", prompt);
-    await addMessage(conversationId, "assistant", agentResponse);
+    // Invoke the graph. The graph will now handle agent-specific memory.
+    const result = await graph.invoke({
+        conversationId,
+        prompt,
+        agentkey
+    });
+
+    const agentResponse = result.response;
+
+    // Save the assistant's final response to the main database (this is also correct)
     await axios.post(`${process.env.CHAT_URL}/savemessage`, { conversationId, role: "assistant", content: agentResponse });
 
     return res.status(200).json({ response: agentResponse });

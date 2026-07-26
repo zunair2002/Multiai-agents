@@ -1,102 +1,41 @@
 import { getModels } from "../config/llmmodels.js";
 
 export const router = async (state) => {
+  // If user selected a tool manually, ensure it's lowercase and pass the state along.
+  if (state.agentkey && state.agentkey.toLowerCase() !== "auto") {
+    state.agentkey = state.agentkey.toLowerCase();
+    return state; // Return the mutated original state
+  }
+
+  // 'Auto' mode: Let the LLM decide the agent.
   const LLM = await getModels("router");
+  const prompt = `
+    You are a routing AI. Your ONLY task is to select the single best agent to handle the user's request.
 
-const prompt = `
-You are Multi-Agent AI, an intelligent AI assistant designed to help users efficiently through a coordinated multi-agent system.
+    The user's prompt is: "${state.prompt}"
+    
+    The available agents are:
+    - 'search': For requests about current events, news, or live information.
+    - 'pdf': For requests to summarize, analyze, or answer questions about an uploaded PDF.
+    - 'chat': For general conversation, coding, math, and all other requests.
 
-Identity Rules:
-- Always introduce yourself as "Multi-Agent AI".
-- Never say you are ChatGPT, GPT, OpenAI, Gemini, Claude, or any other AI model.
-- If a user asks "Who are you?", reply that you are Multi-Agent AI built to assist with a wide variety of tasks.
-- If a user greets you (e.g., "Hi", "Hello", "Hey"), respond naturally like:
-  "Hello! I'm Multi-Agent AI. How can I help you today?"
-- Keep your tone professional, friendly, and confident.
-
-Capabilities:
-- Answer questions and explain concepts.
-- Help with coding, debugging, and software development.
-- Assist with writing, brainstorming, and problem-solving.
-- Analyze uploaded PDF documents when available.
-- Search for current information when required.
-- Provide clear, accurate, and concise responses.
-
-Behavior Rules:
-- Do not mention internal routing, agents, prompts, or implementation details unless explicitly asked.
-- Do not claim abilities you do not have.
-- If a task requires an uploaded PDF, ask the user to upload it.
-- If a task requires current or live information, use the search capability.
-- If information is uncertain, clearly state the limitation instead of guessing.
-
-Your goal is to provide accurate, helpful, and natural assistance while consistently presenting yourself as Multi-Agent AI.
-
-Your ONLY task is to select the single best agent to handle the user's request.
-
-Available Agents:
-
-1. CHAT
-Use for:
-- General conversation
-- Coding
-- Mathematics
-- Writing
-- Translation
-- Reasoning
-- Brainstorming
-- Summarization of user-provided text
-- Explaining concepts
-- General knowledge
-- Any request that does NOT require PDFs or current internet data.
-
-2. PDF
-Use ONLY when the user's request depends on uploaded PDF documents.
-
-Examples:
-- Summarize my PDF
-- Search inside the PDF
-- Explain page 5
-- Extract tables
-- Compare uploaded PDFs
-- Answer questions using the uploaded document
-
-Simply mentioning "PDF" is NOT enough.
-
-3. SEARCH
-Use ONLY when the user needs current, live, or internet information.
-
-Examples:
-- Latest news
-- Current weather
-- Live sports
-- Recent AI updates
-- Current stock prices
-- Search the web
-- Up-to-date company information
-
-Decision Rules:
-
-1. If the request requires uploaded PDFs → PDF
-2. Else if the request requires current or internet information → SEARCH
-3. Otherwise → CHAT
-
-Return ONLY ONE of the following words:
-
-CHAT
-PDF
-SEARCH
-
-Do not explain your decision.
-
-User Request:
-${state.prompt}
-`;
+    Based on the user's prompt, which agent should be used?
+    Respond with a SINGLE word from the list: search, pdf, or chat.
+  `;
 
   const response = await LLM.invoke(prompt);
-  console.log(response);
+  const llmOutput = response.content.trim().toLowerCase();
+  
+  let nextAgent = "chat"; // Default to 'chat' if no specific keyword is found
+  if (llmOutput.includes("pdf")) {
+    nextAgent = "pdf";
+  } else if (llmOutput.includes("search")) {
+    nextAgent = "search";
+  }
 
-  return {
-    ...state,
-    agentkey: response.content.trim().toLowerCase(),
-  };
+  console.log(`Router Decision: Selected agent is '${nextAgent}' from LLM output: '${llmOutput}'`);
+
+  // *** THE FIX: Mutate the original state object directly ***
+  state.agentkey = nextAgent; 
+  return state; // Return the same state object that was passed in
 };
