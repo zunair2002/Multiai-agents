@@ -5,4 +5,5 @@ export const agentstate = Annotation.Root({
  response:Annotation(),
  agentkey:Annotation(),
  conversationId:Annotation(),
+ searchresults:Annotation(),
 })

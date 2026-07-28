@@ -15,9 +15,10 @@ export const agentcontroller = async (req, res) => {
     });
 
     const agentResponse = result.response;
-
-    // Save the assistant's final response to the main database (this is also correct)
     await axios.post(`${process.env.CHAT_URL}/savemessage`, { conversationId, role: "assistant", content: agentResponse });
 
-    return res.status(200).json({ response: agentResponse });
+    return res.status(200).json({
+        response: agentResponse,
+        searchresults: result.searchresults,
+    });
 };

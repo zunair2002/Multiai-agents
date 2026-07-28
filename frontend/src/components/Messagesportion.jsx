@@ -1,12 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { FiMic, FiArrowUp, FiGrid, FiStar ,FiPlus, FiGlobe, FiImage, FiMessageSquare, FiFileText, FiZap } from "react-icons/fi";
+import {
+  FiMic,
+  FiArrowUp,
+  FiGrid,
+  FiStar,
+  FiPlus,
+  FiGlobe,
+  FiImage,
+  FiMessageSquare,
+  FiFileText,
+  FiZap,
+} from "react-icons/fi";
 import { useSelector, useDispatch } from "react-redux";
-import { setMessagesData, addMessagesData } from "../redux/messagesdataslice.js";
+import {
+  setMessagesData,
+  addMessagesData,
+} from "../redux/messagesdataslice.js";
 import { sendMessages } from "../features/AIapi/Sendmessages.js";
 import { getMessages } from "../features/Getmessages.js";
 import { updateConversationTitle } from "../features/UpdateConverationTitle.js";
 import { updatetitle } from "../redux/conversationsdataslice.js";
-import Markdown from "react-markdown";
+import { MarkdownResponse } from "./MarkdownResponse.jsx";
 import Navbar from "./Navbar.jsx";
 
 const Messagesportion = () => {
@@ -21,31 +35,37 @@ const Messagesportion = () => {
   const messagesData = useSelector((state) => state.messagesData.messagesData);
 
   const categories = [
-    "Searching", "General", "Brainstorming", "Summarize PDF", "Trending", "Internet search", "Latest news",
+    "Searching",
+    "General",
+    "Brainstorming",
+    "Summarize PDF",
+    "Trending",
+    "Internet search",
+    "Latest news",
   ];
   const bottomTabs = ["Research", "PDF", "General"];
   const menuItems = [
-  {
-    title: "Auto",
-    description: "Automatically choose the best tool",
-    icon: FiZap,
-  },
-  {
-    title: "Chat Agent",
-    description: "Ask your AI assistant anything",
-    icon: FiMessageSquare,
-  },
-  {
-    title: "PDF Chat",
-    description: "Chat with your PDF documents",
-    icon: FiFileText,
-  },
-  {
-    title: "Web Search",
-    description: "Search real-time information",
-    icon: FiGlobe,
-  }
-];
+    {
+      title: "Auto",
+      description: "Automatically choose the best tool",
+      icon: FiZap,
+    },
+    {
+      title: "Chat Agent",
+      description: "Ask your AI assistant anything",
+      icon: FiMessageSquare,
+    },
+    {
+      title: "PDF Chat",
+      description: "Chat with your PDF documents",
+      icon: FiFileText,
+    },
+    {
+      title: "Web Search",
+      description: "Search real-time information",
+      icon: FiGlobe,
+    },
+  ];
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -70,8 +90,8 @@ const Messagesportion = () => {
   const handleSendMessage = async () => {
     const chatId = activeChatFromRedux?._id || activeChatFromRedux?.id;
     if (!chatId) {
-        console.error("Conversation ID not found. Please wait or refresh.");
-        return;
+      console.error("Conversation ID not found. Please wait or refresh.");
+      return;
     }
     if (!value.trim()) return;
 
@@ -85,24 +105,34 @@ const Messagesportion = () => {
     dispatch(addMessagesData(userMessage));
     setvalue("");
 
-     if ((!activeChatFromRedux?.title || activeChatFromRedux?.title === "New Chat") && !titleSet[chatId]) {
-        const generatedTitle = promptText.length > 30 ? promptText.substring(0, 30) + "..." : promptText;
-        
-        // Use chatId here
-        updateConversationTitle({ id: chatId, title: generatedTitle });
-        dispatch(updatetitle({ conversationId: chatId, title: generatedTitle }));
-        setTitleSet(prev => ({ ...prev, [chatId]: true }));
+    if (
+      (!activeChatFromRedux?.title ||
+        activeChatFromRedux?.title === "New Chat") &&
+      !titleSet[chatId]
+    ) {
+      const generatedTitle =
+        promptText.length > 30
+          ? promptText.substring(0, 30) + "..."
+          : promptText;
+
+      updateConversationTitle({ id: chatId, title: generatedTitle });
+      dispatch(updatetitle({ conversationId: chatId, title: generatedTitle }));
+      setTitleSet((prev) => ({ ...prev, [chatId]: true }));
     }
 
     const payload = {
       prompt: promptText,
       conversationId: chatId,
-      agentkey: selectedTool.toLowerCase()
+      agentkey: selectedTool.toLowerCase(),
     };
 
     try {
-      await sendMessages(payload);
+      const response = await sendMessages(payload);
+      console.log("sendMessages Response:", response);
+
       const data = await getMessages(chatId);
+
+      console.log("getMessages:", data);
       dispatch(setMessagesData(data));
     } catch (err) {
       console.log(err);
@@ -137,9 +167,7 @@ const Messagesportion = () => {
                               : "text-gray-200"
                           }`}
                         >
-                          <Markdown>
-                            {message.content}
-                          </Markdown>
+                          <MarkdownResponse content={message.content} />
                         </div>
 
                         <span
@@ -166,89 +194,86 @@ const Messagesportion = () => {
             </div>
 
             <div className="w-full max-w-3xl mx-auto px-6 pb-5">
-  <div className="relative w-full bg-[#080808] rounded-2xl border border-white/5 p-2 flex items-center gap-2">
+              <div className="relative w-full bg-[#080808] rounded-2xl border border-white/5 p-2 flex items-center gap-2">
+                {/* Plus Button */}
+                <button
+                  onClick={() => setShowMenu(!showMenu)}
+                  className="p-2.5 rounded-xl hover:bg-white/5 transition cursor-pointer"
+                >
+                  <FiPlus className="text-white" />
+                </button>
 
-    {/* Plus Button */}
-    <button
-      onClick={() => setShowMenu(!showMenu)}
-      className="p-2.5 rounded-xl hover:bg-white/5 transition cursor-pointer"
-    >
-      <FiPlus className="text-white" />
-    </button>
+                {/* Toggle Menu */}
+                {showMenu && (
+                  <div className="absolute bottom-16 left-0 w-72 overflow-hidden rounded-2xl border border-white/5 bg-[#080808] backdrop-blur-xl shadow-2xl z-50">
+                    {menuItems.map((item, index) => (
+                      <div key={index}>
+                        <button
+                          onClick={() => {
+                            setSelectedTool(item.title);
+                            setShowMenu(false);
+                          }}
+                          className={`group flex w-full items-center gap-4 px-4 py-3 transition cursor-pointer ${
+                            selectedTool === item.title
+                              ? "bg-[#262626]"
+                              : "hover:bg-[#262626]"
+                          }`}
+                        >
+                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5">
+                            <item.icon className="text-lg text-white" />
+                          </div>
 
-    {/* Toggle Menu */}
-    {showMenu && (
-  <div className="absolute bottom-16 left-0 w-72 overflow-hidden rounded-2xl border border-white/5 bg-[#080808] backdrop-blur-xl shadow-2xl z-50">
+                          <div className="text-left">
+                            <p className="text-xs font-medium text-white">
+                              {item.title}
+                            </p>
+                            <p className="text-[10px] text-white/45">
+                              {item.description}
+                            </p>
+                          </div>
+                        </button>
 
-  {menuItems.map((item, index) => (
-  <div key={index}>
-    <button
-      onClick={() => {
-        setSelectedTool(item.title);
-        setShowMenu(false);
-      }}
-      className={`group flex w-full items-center gap-4 px-4 py-3 transition cursor-pointer ${
-        selectedTool === item.title
-          ? "bg-[#262626]"
-          : "hover:bg-[#262626]"
-      }`}
-    >
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5">
-        <item.icon className="text-lg text-white" />
-      </div>
+                        {index !== menuItems.length - 1 && (
+                          <div className="border-t border-white/10" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-      <div className="text-left">
-        <p className="text-xs font-medium text-white">
-          {item.title}
-        </p>
-        <p className="text-[10px] text-white/45">
-          {item.description}
-        </p>
-      </div>
-    </button>
+                {/* Input */}
+                <input
+                  type="text"
+                  placeholder="Message MultiAgents..."
+                  value={value}
+                  onChange={(e) => setvalue(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+                  className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-gray-500"
+                />
 
-    {index !== menuItems.length - 1 && (
-      <div className="border-t border-white/10" />
-    )}
-  </div>
-))}
+                {/* Mic */}
+                <button className="p-2.5 rounded-xl hover:bg-white/5">
+                  <FiMic className="text-white" />
+                </button>
 
-  </div>
-)}
+                {/* Send */}
+                <button
+                  disabled={!value.trim()}
+                  onClick={handleSendMessage}
+                  className={`p-2.5 rounded-xl transition-colors ${
+                    value.trim()
+                      ? "bg-white hover:bg-gray-200"
+                      : "bg-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  <FiArrowUp className="text-black" />
+                </button>
+              </div>
 
-    {/* Input */}
-    <input
-      type="text"
-      placeholder="Message MultiAgents..."
-      value={value}
-      onChange={(e) => setvalue(e.target.value)}
-      onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-      className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-gray-500"
-    />
-
-    {/* Mic */}
-    <button className="p-2.5 rounded-xl hover:bg-white/5">
-      <FiMic className="text-white" />
-    </button>
-
-    {/* Send */}
-    <button
-      disabled={!value.trim()}
-      onClick={handleSendMessage}
-      className={`p-2.5 rounded-xl transition-colors ${
-        value.trim()
-          ? "bg-white hover:bg-gray-200"
-          : "bg-gray-500 cursor-not-allowed"
-      }`}
-    >
-      <FiArrowUp className="text-black" />
-    </button>
-  </div>
-
-  <p className="text-center text-[10px] text-white/40 mt-2">
-    AI may display inaccurate info, so double-check its responses.
-  </p>
-</div>
+              <p className="text-center text-[10px] text-white/40 mt-2">
+                AI may display inaccurate info, so double-check its responses.
+              </p>
+            </div>
           </div>
         </>
       ) : (

@@ -10,7 +10,9 @@ const messageSchema = new mongoose.Schema({
     },
     content:{
         type:String,
-    }
+        tavilyimages:[String]
+    },
+    
 },
   {
     timestamps: true,
