@@ -16,7 +16,7 @@ export const router = async (state) => {
     
     The available agents are:
     - 'search': For requests about current events, news, or live information.
-    - 'pdf': For requests to summarize, analyze, or answer questions about an uploaded PDF.
+    - 'pdf': For requests to create, generate, summarize, or format content as a PDF, notes, study material, documentation, reports, research papers, guides, manuals, cheat sheets, or any structured document on any topic.
     - 'chat': For general conversation, coding, math, and all other requests.
 
     Based on the user's prompt, which agent should be used?
@@ -26,7 +26,7 @@ export const router = async (state) => {
   const response = await LLM.invoke(prompt);
   const llmOutput = response.content.trim().toLowerCase();
   
-  let nextAgent = "chat"; // Default to 'chat' if no specific keyword is found
+  let nextAgent = "chat"; 
   if (llmOutput.includes("pdf")) {
     nextAgent = "pdf";
   } else if (llmOutput.includes("search")) {
@@ -34,8 +34,6 @@ export const router = async (state) => {
   }
 
   console.log(`Router Decision: Selected agent is '${nextAgent}' from LLM output: '${llmOutput}'`);
-
-  // *** THE FIX: Mutate the original state object directly ***
   state.agentkey = nextAgent; 
-  return state; // Return the same state object that was passed in
+  return state; 
 };

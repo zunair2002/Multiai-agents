@@ -88,7 +88,7 @@ const Sidebar = () => {
 
   return (
    <div className="flex h-screen w-full bg-white font-sans antialiased overflow-hidden">
-  <aside className="w-full h-full bg-[#000000] flex flex-col border-r border-white/10">
+  <aside className="w-full h-full bg-[#20201F] flex flex-col border-r border-white/10">
     <div className="p-4 flex items-center justify-between">
       <div className="flex items-center gap-2">
         <div className="w-9 h-9 flex items-center justify-center">

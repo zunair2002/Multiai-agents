@@ -30,12 +30,14 @@ export const getConversation = async(req,res)=>{
 
 export const saveMessage = async(req,res)=>{
     try{
-        const {conversationId,role,content} = req.body
+        const {conversationId, role, content, fileUrl, fileName} = req.body;
         const messages = await Message.create({
             conversationId,
             role,
             content,
-        })
+            fileUrl,
+            fileName,
+        });
         if(!messages){
             return res.status(404).json({message:'Conversation not found'})
         }

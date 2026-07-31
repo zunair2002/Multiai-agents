@@ -3,7 +3,8 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { FiCopy, FiCheck } from "react-icons/fi";
+import { FiCopy, FiCheck, FiExternalLink} from "react-icons/fi";
+
 
 const CodeBlock = ({ language, value }) => {
   const [copied, setCopied] = useState(false);
@@ -63,7 +64,7 @@ export const MarkdownResponse = ({ content }) => {
             </thead>
           ),
           th: ({ children }) => (
-            <th className="px-5 py-4 font-bold text-zinc-900 dark:text-zinc-100 text-left border-r border-zinc-100 dark:border-zinc-800 last:border-r-0 uppercase text-[11px] tracking-widest bg-zinc-50/50 dark:bg-zinc-900/50">
+            <th className="px-5 py-4 font-bold text-zinc-900 dark:text-zinc-100 text-left border-r border-zinc-100 dark:border-zinc-800 last:border-r-0 text-[14px] bg-zinc-50/50 dark:bg-zinc-900/50">
               {children}
             </th>
           ),
@@ -105,10 +106,17 @@ export const MarkdownResponse = ({ content }) => {
 
           // Links
           a: ({ href, children }) => (
-            <a href={href} target="_blank" className="text-blue-600 dark:text-blue-400 font-semibold hover:underline underline-offset-4 decoration-2 transition-all">
-              {children}
-            </a>
-          ),
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 font-semibold hover:underline underline-offset-4 decoration-2 transition-all"
+  >
+    {children}
+    <FiExternalLink className="w-3 h-3 shrink-0" />
+  </a>
+),
+          
 
           hr: () => <hr className="my-10 border-zinc-200 dark:border-zinc-800" />,
           img: () => null,

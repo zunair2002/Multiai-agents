@@ -24,3 +24,6 @@ Thumbs.db
 readme.txt
 
 **/serviceAccountKey.json
+
+# Legacy local PDF storage (now uploaded to Cloudinary)
+backend/services/agent/uploads/

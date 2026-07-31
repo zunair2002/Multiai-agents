@@ -1,23 +1,25 @@
-import mongoose from "mongoose"
-const messageSchema = new mongoose.Schema({
-    conversationId:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'Conversation'
+import mongoose from "mongoose";
+
+const messageSchema = new mongoose.Schema(
+  {
+    conversationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Conversation",
     },
-    role:{
-        type:String,
-        enum:['user','assistant']
+    role: {
+      type: String,
+      enum: ["user", "assistant"],
     },
-    content:{
-        type:String,
-        tavilyimages:[String]
+    content: {
+      type: String,
     },
-    
-},
+    fileUrl: { type: String, default: null },
+    fileName: { type: String, default: null },
+  },
   {
     timestamps: true,
-  })
-const Message = mongoose.model('Message',messageSchema)
-export default Message
+  }
+);
 
-
+const Message = mongoose.model("Message", messageSchema);
+export default Message;

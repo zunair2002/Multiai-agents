@@ -10,6 +10,12 @@ import {
   FiMessageSquare,
   FiFileText,
   FiZap,
+  FiCopy,
+FiVolume2,
+FiThumbsUp,
+FiThumbsDown,
+FiRefreshCw,
+
 } from "react-icons/fi";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -27,7 +33,7 @@ const Messagesportion = () => {
   const [value, setvalue] = useState("");
   const [titleSet, setTitleSet] = useState({});
   const [showMenu, setShowMenu] = useState(false);
-  const [selectedTool, setSelectedTool] = useState("Auto");
+  const [selectedTool, setSelectedTool] = useState("auto");
   const dispatch = useDispatch();
   const activeChatFromRedux = useSelector(
     (state) => state.conversationData.selectedConversationData,
@@ -47,21 +53,25 @@ const Messagesportion = () => {
   const menuItems = [
     {
       title: "Auto",
+      agentKey: "auto",
       description: "Automatically choose the best tool",
       icon: FiZap,
     },
     {
       title: "Chat Agent",
+      agentKey: "chat",
       description: "Ask your AI assistant anything",
       icon: FiMessageSquare,
     },
     {
       title: "PDF Chat",
+      agentKey: "pdf",
       description: "Chat with your PDF documents",
       icon: FiFileText,
     },
     {
       title: "Web Search",
+      agentKey: "search",
       description: "Search real-time information",
       icon: FiGlobe,
     },
@@ -123,7 +133,7 @@ const Messagesportion = () => {
     const payload = {
       prompt: promptText,
       conversationId: chatId,
-      agentkey: selectedTool.toLowerCase(),
+      agentkey: selectedTool.agentKey.toLowerCase(),
     };
 
     try {
@@ -140,7 +150,7 @@ const Messagesportion = () => {
   };
 
   return (
-    <div className="flex-1 h-screen bg-[#000000] flex flex-col overflow-hidden font-sans selection:bg-indigo-100">
+    <div className="flex-1 h-screen bg-[#20201F] flex flex-col overflow-hidden font-sans selection:bg-indigo-100">
       {activeChatFromRedux ? (
         <>
           <Navbar />
@@ -149,37 +159,69 @@ const Messagesportion = () => {
               {messagesData &&
               messagesData.messages &&
               messagesData.messages.length > 0 ? (
-                <div className="space-y-6 py-6 flex flex-col">
+                <div className="space-y-8 py-6 flex flex-col">
                   {messagesData.messages.map((message, index) => (
                     <div
                       key={index}
-                      className={`flex ${
+                      className={`flex w-full ${
                         message.role === "user"
                           ? "justify-end"
                           : "justify-start"
                       }`}
                     >
-                      <div className="max-w-[85%] flex flex-col">
+                      <div className={`max-w-[85%] flex flex-col ${message.role === "user" ? "items-end" : "items-start"}`}>
                         <div
-                          className={`text-[14px] leading-relaxed ${
+                          className={`text-[14px] leading-relaxed px-4 py-2 rounded-2xl ${
                             message.role === "user"
-                              ? "text-white"
-                              : "text-gray-200"
+                              ? "text-white bg-[#262626]"
+                              : "text-gray-200 bg-transparent !px-0"
                           }`}
                         >
-                          <MarkdownResponse content={message.content} />
+                          {message.fileUrl ? (
+                            <div className="flex items-center gap-3 bg-[#1A1A1A] border border-white/10 rounded-xl p-3 max-w-[260px]">
+                              <FiFileText className="text-red-400" size={22} />
+                              <div className="flex-1 overflow-hidden">
+                                <p className="text-xs text-white truncate">
+                                  {message.fileName || "document.pdf"}
+                                </p>
+                                <p className="text-[10px] text-white/40">
+                                  PDF Document
+                                </p>
+                              </div>
+                               <a
+                                href={message.fileUrl}
+                                download={message.fileName}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 shrink-0"
+                              >
+                                <FiArrowUp
+                                  className="rotate-180 text-white"
+                                  size={14}
+                                />
+                              </a>
+                            </div>
+                          ) : (
+                            <MarkdownResponse content={message.content} />
+                          )}
                         </div>
 
-                        <span
-                          className={`text-[9px] text-gray-500 mt-1 ${
-                            message.role === "user" ? "text-right" : "text-left"
-                          }`}
-                        >
-                          {new Date(message.createdAt).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </span>
+                        {message.role === "user" ? (
+                           <span className="text-[9px] text-gray-500 mt-1">
+                           {new Date(message.createdAt).toLocaleTimeString([], {
+                             hour: "2-digit",
+                             minute: "2-digit",
+                           })}
+                         </span>
+                        ) : (
+                          <div className="flex items-center gap-3 mt-2 text-gray-500">
+                            <button className="hover:text-white transition-colors cursor-pointer"><FiCopy size={12}/></button>
+                            <button className="hover:text-white transition-colors cursor-pointer"><FiVolume2 size={12}/></button>
+                            <button className="hover:text-white transition-colors cursor-pointer"><FiRefreshCw size={12}/></button>
+                            <button className="hover:text-white transition-colors cursor-pointer"><FiThumbsUp size={12}/></button>
+                            <button className="hover:text-white transition-colors cursor-pointer"><FiThumbsDown size={12}/></button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -194,8 +236,7 @@ const Messagesportion = () => {
             </div>
 
             <div className="w-full max-w-3xl mx-auto px-6 pb-5">
-              <div className="relative w-full bg-[#080808] rounded-2xl border border-white/5 p-2 flex items-center gap-2">
-                {/* Plus Button */}
+              <div className="relative w-full bg-[#272726] rounded-2xl border border-white/5 p-2 flex items-center gap-2">
                 <button
                   onClick={() => setShowMenu(!showMenu)}
                   className="p-2.5 rounded-xl hover:bg-white/5 transition cursor-pointer"
@@ -203,18 +244,20 @@ const Messagesportion = () => {
                   <FiPlus className="text-white" />
                 </button>
 
-                {/* Toggle Menu */}
                 {showMenu && (
                   <div className="absolute bottom-16 left-0 w-72 overflow-hidden rounded-2xl border border-white/5 bg-[#080808] backdrop-blur-xl shadow-2xl z-50">
                     {menuItems.map((item, index) => (
                       <div key={index}>
                         <button
                           onClick={() => {
-                            setSelectedTool(item.title);
+                            setSelectedTool({
+                              title: item.title,
+                              agentKey: item.agentKey,
+                            });
                             setShowMenu(false);
                           }}
                           className={`group flex w-full items-center gap-4 px-4 py-3 transition cursor-pointer ${
-                            selectedTool === item.title
+                            selectedTool.title === item.title
                               ? "bg-[#262626]"
                               : "hover:bg-[#262626]"
                           }`}
@@ -241,7 +284,6 @@ const Messagesportion = () => {
                   </div>
                 )}
 
-                {/* Input */}
                 <input
                   type="text"
                   placeholder="Message MultiAgents..."
@@ -251,12 +293,10 @@ const Messagesportion = () => {
                   className="flex-1 bg-transparent outline-none text-sm text-white placeholder:text-gray-500"
                 />
 
-                {/* Mic */}
                 <button className="p-2.5 rounded-xl hover:bg-white/5">
                   <FiMic className="text-white" />
                 </button>
 
-                {/* Send */}
                 <button
                   disabled={!value.trim()}
                   onClick={handleSendMessage}
@@ -284,10 +324,10 @@ const Messagesportion = () => {
                 Enhance your{" "}
                 <span className="relative inline-block">
                   <FiStar
-                    className="absolute -top-1 -right-4 rotate-12 text-[#8917d5]"
+                    className="absolute -top-1 -right-4 rotate-12 text-[#D97757]"
                     size={16}
                   />
-                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#7C3AED] via-[#8917d5] to-[#5B6CFF]">
+                  <span className="bg-clip-text text-white">
                     Productivity
                   </span>
                 </span>{" "}
@@ -299,7 +339,7 @@ const Messagesportion = () => {
               {categories.map((cat, i) => (
                 <button
                   key={i}
-                  className="px-4 py-1.5 rounded-full text-[11px] font-medium border bg-[#1A1A1A] border-white/5 text-gray-400 hover:border-white/20 hover:text-white transition-all"
+                  className="px-4 py-1.5 rounded-md text-[11px] font-medium bg-[#3F3F3F] text-white hover:bg-[#4b4b4b] hover:text-white transition-all"
                 >
                   {cat}
                 </button>
@@ -308,19 +348,19 @@ const Messagesportion = () => {
           </div>
 
           <div className="flex-1 flex items-center justify-center">
-            <h2 className="text-3xl md:text-5xl font-bold text-[#262626]">
+            <h2 className="text-2xl md:text-4xl font-bold text-[#d97857]">
               Ready when you are.
             </h2>
           </div>
 
           <div className="w-full max-w-2xl flex flex-col items-center mb-6">
-            <div className="flex items-center gap-1.5 bg-[#262626] p-1.5 rounded-full border border-white/5">
+            <div className="flex items-center gap-1.5 bg-[#262626] p-1.5 rounded-full border shadow-lg border-white/5">
               {bottomTabs.map((tab, i) => (
                 <button
                   key={i}
                   className={`px-4 py-1 rounded-full text-[11px] font-medium transition-all ${
                     i === 0
-                      ? "bg-white text-black"
+                      ? "bg-[#d97857] text-white"
                       : "text-gray-400 hover:text-white"
                   }`}
                 >
