@@ -17,17 +17,20 @@ export const router = async (state) => {
     The available agents are:
     - 'search': For requests about current events, news, or live information.
     - 'pdf': For requests to create, generate, summarize, or format content as a PDF, notes, study material, documentation, reports, research papers, guides, manuals, cheat sheets, or any structured document on any topic.
+    - 'ppt': For requests to create, generate, or format content as a PPT, PowerPoint, presentation, slides, or slide deck on any topic.
     - 'chat': For general conversation, coding, math, and all other requests.
 
     Based on the user's prompt, which agent should be used?
-    Respond with a SINGLE word from the list: search, pdf, or chat.
+    Respond with a SINGLE word from the list: search, pdf, ppt, or chat.
   `;
 
   const response = await LLM.invoke(prompt);
   const llmOutput = response.content.trim().toLowerCase();
-  
-  let nextAgent = "chat"; 
-  if (llmOutput.includes("pdf")) {
+
+  let nextAgent = "chat";
+  if (llmOutput.includes("ppt")) {
+    nextAgent = "ppt";
+  } else if (llmOutput.includes("pdf")) {
     nextAgent = "pdf";
   } else if (llmOutput.includes("search")) {
     nextAgent = "search";

@@ -13,6 +13,8 @@ export const getModels = async(agent) => {
             return groq
         case "pdf":
             return groq
+        case "ppt":
+            return groq
         case "chat":
             return groq
         default:

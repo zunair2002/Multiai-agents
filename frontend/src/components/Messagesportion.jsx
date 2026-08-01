@@ -9,6 +9,7 @@ import {
   FiImage,
   FiMessageSquare,
   FiFileText,
+  FiMonitor,
   FiZap,
   FiCopy,
 FiVolume2,
@@ -70,6 +71,12 @@ const Messagesportion = () => {
       agentKey: "pdf",
       description: "Chat with your PDF documents",
       icon: FiFileText,
+    },
+    {
+      title: "PPT Chat",
+      agentKey: "ppt",
+      description: "Create presentations on any topic",
+      icon: FiMonitor,
     },
     {
       title: "Web Search",
@@ -245,47 +252,6 @@ const Messagesportion = () => {
                 >
                   <FiPlus className="text-white" />
                 </button>
-
-                {showMenu && (
-                  <div className="absolute bottom-16 left-0 w-72 overflow-hidden rounded-2xl border border-white/2 bg-[#262626] backdrop-blur-xl shadow-3xl z-50">
-                    {menuItems.map((item, index) => (
-                      <div key={index}>
-                        <button
-                          onClick={() => {
-                            setSelectedTool({
-                              title: item.title,
-                              agentKey: item.agentKey,
-                            });
-                            setShowMenu(false);
-                          }}
-                          className={`group flex w-full items-center gap-4 px-4 py-3 transition cursor-pointer ${
-                            selectedTool.title === item.title
-                              ? "bg-[#3b3a3a]"
-                              : "hover:bg-[#3b3a3a]"
-                          }`}
-                        >
-                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5">
-                            <item.icon className="text-lg text-white" />
-                          </div>
-
-                          <div className="text-left">
-                            <p className="text-xs font-medium text-white">
-                              {item.title}
-                            </p>
-                            <p className="text-[10px] text-white/45">
-                              {item.description}
-                            </p>
-                          </div>
-                        </button>
-
-                        {index !== menuItems.length - 1 && (
-                          <div className="border-t border-white/10" />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
                 <input
                   type="text"
                   placeholder="Message MultiAgents..."
@@ -312,9 +278,29 @@ const Messagesportion = () => {
                 </button>
               </div>
 
-              <p className="text-center text-[10px] text-white/40 mt-2">
-                AI may display inaccurate info, so double-check its responses.
-              </p>
+              <div className="flex justify-center mt-3">
+  <div className="flex items-center gap-0.5 bg-[#262626] p-1.5 rounded-full border border-white/5 shadow-lg">
+    {menuItems.map((item) => (
+      <button
+        key={item.agentKey}
+        onClick={() =>
+          setSelectedTool({
+            title: item.title,
+            agentKey: item.agentKey,
+          })
+        }
+        className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors ${
+          selectedTool.agentKey === item.agentKey
+            ? "bg-[#d97857] text-white"
+            : "text-gray-400 hover:text-white"
+        }`}
+      >
+        <item.icon size={14} />
+        <span>{item.title}</span>
+      </button>
+    ))}
+  </div>
+</div>
             </div>
           </div>
         </>
