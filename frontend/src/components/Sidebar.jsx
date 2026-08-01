@@ -89,16 +89,19 @@ const Sidebar = () => {
   return (
    <div className="flex h-screen w-full bg-white font-sans antialiased overflow-hidden">
   <aside className="w-full h-full bg-[#20201F] flex flex-col border-r border-white/10">
-    <div className="p-4 flex items-center justify-between">
+<div
+  className="p-4 flex items-center justify-between"
+  style={{ marginTop: "-18px" }}
+>
       <div className="flex items-center gap-2">
-        <div className="w-9 h-9 flex items-center justify-center">
-          <img
-            src="/ailogo.png"
-            alt="Logo"
-            className="h-full w-full object-contain"
-          />
-        </div>
-      </div>
+  <div className="w-15 h-15 flex items-center justify-center overflow-hidden">
+    <img
+      src="/ChatGPT_Image_Aug_1__2026__02_42_21_PM-removebg-preview.png"
+      alt="Logo"
+      className="w-full h-full object-contain scale-125 translate-y-1"
+    />
+  </div>
+</div>
       <div className="flex items-center gap-3">
         <button className="p-1 text-white hover:text-white transition-colors cursor-pointer">
           <FiSearch size={18} /> 
@@ -177,7 +180,7 @@ const Sidebar = () => {
                       isActive ? "bg-transparent hover:bg-white/5 hover:text-white font-medium text-white" : "text-white/70 hover:bg-white/5 hover:text-white font-medium"
                     }`}
                   >
-                    <p className="text-xs truncate">
+                    <p className="text-sm truncate">
                       {conversation.title || conversation.name || "New Chat"}
                     </p>
                   </button>

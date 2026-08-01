@@ -4,7 +4,7 @@ export const router = async (state) => {
   // If user selected a tool manually, ensure it's lowercase and pass the state along.
   if (state.agentkey && state.agentkey.toLowerCase() !== "auto") {
     state.agentkey = state.agentkey.toLowerCase();
-    return state; // Return the mutated original state
+    return state; 
   }
 
   // 'Auto' mode: Let the LLM decide the agent.

@@ -33,7 +33,9 @@ const Messagesportion = () => {
   const [value, setvalue] = useState("");
   const [titleSet, setTitleSet] = useState({});
   const [showMenu, setShowMenu] = useState(false);
-  const [selectedTool, setSelectedTool] = useState("auto");
+  const [selectedTool, setSelectedTool] = useState({
+  agentKey: "auto"
+    });  
   const dispatch = useDispatch();
   const activeChatFromRedux = useSelector(
     (state) => state.conversationData.selectedConversationData,
@@ -133,7 +135,7 @@ const Messagesportion = () => {
     const payload = {
       prompt: promptText,
       conversationId: chatId,
-      agentkey: selectedTool.agentKey.toLowerCase(),
+      agentkey: selectedTool.agentKey.toLowerCase() || 'auto',
     };
 
     try {
@@ -245,7 +247,7 @@ const Messagesportion = () => {
                 </button>
 
                 {showMenu && (
-                  <div className="absolute bottom-16 left-0 w-72 overflow-hidden rounded-2xl border border-white/5 bg-[#080808] backdrop-blur-xl shadow-2xl z-50">
+                  <div className="absolute bottom-16 left-0 w-72 overflow-hidden rounded-2xl border border-white/2 bg-[#262626] backdrop-blur-xl shadow-3xl z-50">
                     {menuItems.map((item, index) => (
                       <div key={index}>
                         <button
@@ -258,8 +260,8 @@ const Messagesportion = () => {
                           }}
                           className={`group flex w-full items-center gap-4 px-4 py-3 transition cursor-pointer ${
                             selectedTool.title === item.title
-                              ? "bg-[#262626]"
-                              : "hover:bg-[#262626]"
+                              ? "bg-[#3b3a3a]"
+                              : "hover:bg-[#3b3a3a]"
                           }`}
                         >
                           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5">
@@ -339,7 +341,7 @@ const Messagesportion = () => {
               {categories.map((cat, i) => (
                 <button
                   key={i}
-                  className="px-4 py-1.5 rounded-md text-[11px] font-medium bg-[#3F3F3F] text-white hover:bg-[#4b4b4b] hover:text-white transition-all"
+                  className="px-4 py-1.5 rounded-md text-[11px] font-medium bg-[#262626] text-white hover:bg-[#4b4b4b] hover:text-white transition-all"
                 >
                   {cat}
                 </button>
