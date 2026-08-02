@@ -36,23 +36,23 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#18181b] flex items-center justify-center px-6">
+    <div className="min-h-screen bg-[#20201F] flex items-center justify-center px-6">
       <div className="w-full max-w-[420px]">
         <div className="mb-10 text-center">
-          <div className="mx-auto mb-5 flex h-24 w-24 items-center justify-center">
-  <img
-    src="/ailogo.png"
-    alt="MultiAgents Logo"
-    className="h-25 w-30 object-contain"
-  />
-</div>
-<div className="mx-auto my-6 h-px w-80 bg-zinc-800"></div>
-<p className="mt-3 text-zinc-100">
+          <div className="relative mx-auto mb-5 h-40 w-40 overflow-visible">
+            <img
+              src="/ChatGPT_Image_Aug_1__2026__02_42_21_PM-removebg-preview.png"
+              alt="MultiAgents Logo"
+              className="absolute left-1/2 -translate-x-1/2 -top-8 w-56 h-56 object-contain"
+            />
+          </div>
+          <div className="mx-auto my-6 h-px w-80 bg-[#2b2b2b]"></div>
+          <p className="mt-3 text-zinc-100">
             Sign in to continue to your workspace.
           </p>
         </div>
 
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-8 shadow-xl">
+        <div className="rounded-2xl border border-zinc-800 text-white/80 bg-zinc-900/80 p-8 shadow-xl" style={{ backgroundColor: "#131313" }}>
           {error && (
             <div className="mb-5 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
               {error}
@@ -61,9 +61,9 @@ const Login = () => {
 
           <button
             onClick={handleGoogleLogin}
-            className="flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-white text-zinc-900 font-medium transition hover:bg-zinc-300 hover:cursor-pointer transition" 
+            className="flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-white text-zinc-900 font-medium transition hover:bg-zinc-300 hover:cursor-pointer transition"
           >
-            <FcGoogle size={20}/>
+            <FcGoogle size={20} />
             Continue with Google
           </button>
 

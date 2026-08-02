@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   FiMic,
   FiArrowUp,
@@ -12,11 +12,11 @@ import {
   FiMonitor,
   FiZap,
   FiCopy,
-FiVolume2,
-FiThumbsUp,
-FiThumbsDown,
-FiRefreshCw,
-
+  FiVolume2,
+  FiThumbsUp,
+  FiThumbsDown,
+  FiRefreshCw,
+  FiX,
 } from "react-icons/fi";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -34,9 +34,11 @@ const Messagesportion = () => {
   const [value, setvalue] = useState("");
   const [titleSet, setTitleSet] = useState({});
   const [showMenu, setShowMenu] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const fileInputRef = useRef(null);
   const [selectedTool, setSelectedTool] = useState({
-  agentKey: "auto"
-    });  
+    agentKey: "auto",
+  });
   const dispatch = useDispatch();
   const activeChatFromRedux = useSelector(
     (state) => state.conversationData.selectedConversationData,
@@ -112,17 +114,24 @@ const Messagesportion = () => {
       console.error("Conversation ID not found. Please wait or refresh.");
       return;
     }
-    if (!value.trim()) return;
+    if (!value.trim() && !selectedFile) return;
 
-    const promptText = value.trim();
+    const promptText =
+      value.trim() || (selectedFile ? "Summarize this document." : "");
+    const attachedFile = selectedFile;
     const userMessage = {
       role: "user",
       content: promptText,
+      ...(attachedFile && {
+        fileUrl: URL.createObjectURL(attachedFile),
+        fileName: attachedFile.name,
+      }),
       createdAt: new Date().toISOString(),
     };
 
     dispatch(addMessagesData(userMessage));
     setvalue("");
+    setSelectedFile(null);
 
     if (
       (!activeChatFromRedux?.title ||
@@ -139,14 +148,24 @@ const Messagesportion = () => {
       setTitleSet((prev) => ({ ...prev, [chatId]: true }));
     }
 
-    const payload = {
-      prompt: promptText,
-      conversationId: chatId,
-      agentkey: selectedTool.agentKey.toLowerCase() || 'auto',
-    };
-
     try {
-      const response = await sendMessages(payload);
+      let response;
+      if (attachedFile) {
+        const formData = new FormData();
+        formData.append("file", attachedFile);
+        formData.append("prompt", promptText);
+        formData.append("conversationId", chatId);
+        // A PDF attachment always routes to the RAG agent, so keep "auto".
+        formData.append("agentkey", "auto");
+        response = await sendMessages(formData);
+      } else {
+        const payload = {
+          prompt: promptText,
+          conversationId: chatId,
+          agentkey: selectedTool.agentKey.toLowerCase() || "auto",
+        };
+        response = await sendMessages(payload);
+      }
       console.log("sendMessages Response:", response);
 
       const data = await getMessages(chatId);
@@ -178,7 +197,9 @@ const Messagesportion = () => {
                           : "justify-start"
                       }`}
                     >
-                      <div className={`max-w-[85%] flex flex-col ${message.role === "user" ? "items-end" : "items-start"}`}>
+                      <div
+                        className={`max-w-[85%] flex flex-col ${message.role === "user" ? "items-end" : "items-start"}`}
+                      >
                         <div
                           className={`text-[14px] leading-relaxed px-4 py-2 rounded-2xl ${
                             message.role === "user"
@@ -197,7 +218,7 @@ const Messagesportion = () => {
                                   PDF Document
                                 </p>
                               </div>
-                               <a
+                              <a
                                 href={message.fileUrl}
                                 download={message.fileName}
                                 target="_blank"
@@ -216,19 +237,32 @@ const Messagesportion = () => {
                         </div>
 
                         {message.role === "user" ? (
-                           <span className="text-[9px] text-gray-500 mt-1">
-                           {new Date(message.createdAt).toLocaleTimeString([], {
-                             hour: "2-digit",
-                             minute: "2-digit",
-                           })}
-                         </span>
+                          <span className="text-[9px] text-gray-500 mt-1">
+                            {new Date(message.createdAt).toLocaleTimeString(
+                              [],
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              },
+                            )}
+                          </span>
                         ) : (
                           <div className="flex items-center gap-3 mt-2 text-gray-500">
-                            <button className="hover:text-white transition-colors cursor-pointer"><FiCopy size={12}/></button>
-                            <button className="hover:text-white transition-colors cursor-pointer"><FiVolume2 size={12}/></button>
-                            <button className="hover:text-white transition-colors cursor-pointer"><FiRefreshCw size={12}/></button>
-                            <button className="hover:text-white transition-colors cursor-pointer"><FiThumbsUp size={12}/></button>
-                            <button className="hover:text-white transition-colors cursor-pointer"><FiThumbsDown size={12}/></button>
+                            <button className="hover:text-white transition-colors cursor-pointer">
+                              <FiCopy size={12} />
+                            </button>
+                            <button className="hover:text-white transition-colors cursor-pointer">
+                              <FiVolume2 size={12} />
+                            </button>
+                            <button className="hover:text-white transition-colors cursor-pointer">
+                              <FiRefreshCw size={12} />
+                            </button>
+                            <button className="hover:text-white transition-colors cursor-pointer">
+                              <FiThumbsUp size={12} />
+                            </button>
+                            <button className="hover:text-white transition-colors cursor-pointer">
+                              <FiThumbsDown size={12} />
+                            </button>
                           </div>
                         )}
                       </div>
@@ -245,9 +279,35 @@ const Messagesportion = () => {
             </div>
 
             <div className="w-full max-w-3xl mx-auto px-6 pb-5">
+              {selectedFile && (
+                <div className="flex items-center gap-2 bg-[#272726] border border-white/10 rounded-xl px-3 py-2 mb-2 max-w-[260px]">
+                  <FiFileText className="text-red-400 shrink-0" size={18} />
+                  <span className="flex-1 text-xs text-white truncate">
+                    {selectedFile.name}
+                  </span>
+                  <button
+                    onClick={() => setSelectedFile(null)}
+                    className="p-1 rounded-md hover:bg-white/10 shrink-0 cursor-pointer"
+                  >
+                    <FiX className="text-white/60" size={14} />
+                  </button>
+                </div>
+              )}
               <div className="relative w-full bg-[#272726] rounded-2xl border border-white/5 p-2 flex items-center gap-2">
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  ref={fileInputRef}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) setSelectedFile(file);
+                    e.target.value = "";
+                  }}
+                  className="hidden"
+                />
                 <button
-                  onClick={() => setShowMenu(!showMenu)}
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Attach PDF"
                   className="p-2.5 rounded-xl hover:bg-white/5 transition cursor-pointer"
                 >
                   <FiPlus className="text-white" />
@@ -266,10 +326,10 @@ const Messagesportion = () => {
                 </button>
 
                 <button
-                  disabled={!value.trim()}
+                  disabled={!value.trim() && !selectedFile}
                   onClick={handleSendMessage}
                   className={`p-2.5 rounded-xl transition-colors ${
-                    value.trim()
+                    value.trim() || selectedFile
                       ? "bg-white hover:bg-gray-200"
                       : "bg-gray-500 cursor-not-allowed"
                   }`}
@@ -279,28 +339,28 @@ const Messagesportion = () => {
               </div>
 
               <div className="flex justify-center mt-3">
-  <div className="flex items-center gap-0.5 bg-[#262626] p-1.5 rounded-full border border-white/5 shadow-lg">
-    {menuItems.map((item) => (
-      <button
-        key={item.agentKey}
-        onClick={() =>
-          setSelectedTool({
-            title: item.title,
-            agentKey: item.agentKey,
-          })
-        }
-        className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors ${
-          selectedTool.agentKey === item.agentKey
-            ? "bg-[#d97857] text-white"
-            : "text-gray-400 hover:text-white"
-        }`}
-      >
-        <item.icon size={14} />
-        <span>{item.title}</span>
-      </button>
-    ))}
-  </div>
-</div>
+                <div className="flex items-center gap-0.5 bg-[#262626] p-1.5 rounded-full border border-white/5 shadow-lg">
+                  {menuItems.map((item) => (
+                    <button
+                      key={item.agentKey}
+                      onClick={() =>
+                        setSelectedTool({
+                          title: item.title,
+                          agentKey: item.agentKey,
+                        })
+                      }
+                      className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-[11px] font-medium transition-colors ${
+                        selectedTool.agentKey === item.agentKey
+                          ? "bg-[#d97857] text-white"
+                          : "text-gray-400 hover:text-white"
+                      }`}
+                    >
+                      <item.icon size={14} />
+                      <span>{item.title}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </>
@@ -315,14 +375,11 @@ const Messagesportion = () => {
                     className="absolute -top-1 -right-4 rotate-12 text-[#D97757]"
                     size={16}
                   />
-                  <span className="bg-clip-text text-white">
-                    Productivity
-                  </span>
+                  <span className="bg-clip-text text-white">Productivity</span>
                 </span>{" "}
                 with AI
               </h1>
             </div>
-
             <div className="flex flex-wrap justify-center gap-2">
               {categories.map((cat, i) => (
                 <button
@@ -334,13 +391,11 @@ const Messagesportion = () => {
               ))}
             </div>
           </div>
-
           <div className="flex-1 flex items-center justify-center">
             <h2 className="text-2xl md:text-4xl font-bold text-[#d97857]">
               Ready when you are.
             </h2>
           </div>
-
           <div className="w-full max-w-2xl flex flex-col items-center mb-6">
             <div className="flex items-center gap-1.5 bg-[#262626] p-1.5 rounded-full border shadow-lg border-white/5">
               {bottomTabs.map((tab, i) => (
@@ -355,7 +410,6 @@ const Messagesportion = () => {
                   {tab}
                 </button>
               ))}
-
               <div className="h-4 w-[1px] bg-white/10 mx-1"></div>
               <button className="flex items-center gap-1.5 px-3 py-1 text-[11px] text-gray-400 hover:text-white">
                 <FiGrid size={12} />

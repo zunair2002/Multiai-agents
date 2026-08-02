@@ -7,6 +7,12 @@ export const router = async (state) => {
     return state; 
   }
 
+  // If user uploaded a file, pass it to the next agent.
+  if (state.file && state.file.mimetype === 'application/pdf') {
+    state.agentkey = "rag";
+    return state; 
+  }
+
   // 'Auto' mode: Let the LLM decide the agent.
   const LLM = await getModels("router");
   const prompt = `

@@ -12,10 +12,14 @@ export const agentcontroller = async (req, res) => {
       content: prompt,
     });
 
-    const result = await graph.invoke({ conversationId, prompt, agentkey });
+    const result = await graph.invoke({
+      conversationId,
+      prompt,
+      agentkey,
+      file: req.file,
+    });
     const agentResponse = result.response;
 
-    // ✅ optional chaining se safe check - agar pdf agent ne khud save kar diya
     if (!(agentResponse && agentResponse.status === "completed")) {
       await axios.post(`${process.env.CHAT_URL}/savemessage`, {
         conversationId,

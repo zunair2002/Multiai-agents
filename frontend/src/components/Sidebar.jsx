@@ -236,7 +236,7 @@ const Sidebar = () => {
         </div>
 
         {showMenu && (
-          <div className="absolute bottom-full left-0 right-0 mb-2 p-0 rounded-xl border border-white/4 bg-[#0d0d0d] shadow-xl z-50 backdrop-blur-xl animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <div className="absolute bottom-full left-0 right-0 mb-2 p-0 rounded-xl border border-white/4 bg-[#131313] shadow-xl z-50 backdrop-blur-xl animate-in fade-in slide-in-from-bottom-2 duration-200">
   <button
     onClick={handleLogout}
     className="w-full flex items-center gap-2 px-3 py-2.5 text-[12px] text-red-500 hover:bg-[#222222] hover:cursor-pointer transition-all duration-150 group rounded-xl"

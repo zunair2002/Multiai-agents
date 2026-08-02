@@ -5,7 +5,6 @@ import { searchagent } from "../search.agent.js";
 import { pdfagent } from "../pdf.agent.js";
 import { chatagent } from "../chat.agent.js";
 import { pptagent } from "../pptagent.js";
-import { imageagent } from "../image.agent.js";
 import { ragagent } from "../rag.agent.js";
 
 
@@ -19,7 +18,6 @@ workflow.addNode("search",searchagent)
 workflow.addNode("pdf",pdfagent)
 workflow.addNode("chat",chatagent)
 workflow.addNode("ppt",pptagent)
-workflow.addNode("image",imageagent)
 workflow.addNode("rag",ragagent)
 
 //ab workflow ko apis ,may connect krna
@@ -39,8 +37,6 @@ workflow.addConditionalEdges(
         return "ppt";
       case "chat":
         return "chat";
-      case "image":
-        return "image";
       case "rag":
         return "rag";
       default:
@@ -52,7 +48,6 @@ workflow.addConditionalEdges(
     pdf: "pdf",
     ppt: "ppt",
     chat: "chat",
-    image: "image",
     rag: "rag",
   }
 );
@@ -61,7 +56,6 @@ workflow.addEdge("search","chat")
 workflow.addEdge("pdf","__end__")
 workflow.addEdge("ppt","__end__")
 workflow.addEdge("chat","__end__")
-workflow.addEdge("image","__end__")
 workflow.addEdge("rag","__end__")
 
 export const graph = workflow.compile();
