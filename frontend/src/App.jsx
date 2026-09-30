@@ -3,6 +3,7 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
+  Navigate,
 } from "react-router-dom";
 import Mainpage from "./pages/Mainpage/Mainhome.jsx"
 import Login from "./pages/authentication/Login.jsx";
@@ -40,7 +41,11 @@ function App() {
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/" element={user ? <Mainpage /> : <Landing />} />
+        <Route path="/" element={<Landing />} />
+        <Route
+          path="/workspace"
+          element={user ? <Mainpage /> : <Navigate to="/login" replace />}
+        />
       </Routes>
     </Router>
   );

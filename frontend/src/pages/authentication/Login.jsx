@@ -17,7 +17,7 @@ const Login = () => {
 
   useEffect(() => {
     if (user) {
-      navigate("/");
+      navigate("/workspace", { replace: true });
     }
   }, [user, navigate]);
 

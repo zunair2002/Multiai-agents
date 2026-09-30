@@ -18,8 +18,8 @@ export default function Landing() {
           </Link>
 
           <nav className="hidden items-center gap-7 text-sm text-white/55 md:flex">
-            <a href="#how-it-works" className="transition hover:text-white">How it works</a>
-            <a href="#agents" className="transition hover:text-white">Agents</a>
+            <a className="transition hover:text-white cursor-pointer">How it works</a>
+            <a className="transition hover:text-white cursor-pointer">Agents</a>
           </nav>
 
           <Link
