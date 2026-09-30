@@ -1,3 +1,11 @@
 @import "tailwindcss";
 
 @plugin "@tailwindcss/typography";
+
+html {
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
+}
