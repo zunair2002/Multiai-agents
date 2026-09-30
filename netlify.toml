@@ -1,0 +1,11 @@
+[build]
+  base = "frontend"
+  command = "npm ci --include=dev && npm run build"
+  publish = "dist"
+
+# React Router (BrowserRouter) handles routes like /login in the browser,
+# so every path must fall back to index.html instead of returning a 404.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
